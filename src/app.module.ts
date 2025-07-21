@@ -6,7 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import databaseConfig from './config/database.config';
 import environmentValidation from './config/environmentValidation';
 import { MongooseModule } from '@nestjs/mongoose';
-
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +25,10 @@ import { MongooseModule } from '@nestjs/mongoose';
         useUnifiedTopology: true,
       }),
     }),
+
+    AuthModule,
+
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

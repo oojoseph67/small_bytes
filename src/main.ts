@@ -1,6 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import {
+  Logger,
+  ValidationPipe,
+  ClassSerializerInterceptor,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import helmet from 'helmet';
 import * as compression from 'compression';
 
@@ -20,6 +25,12 @@ async function bootstrap() {
     }),
   );
 
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
+
+  app.setGlobalPrefix('api');
+
   app.use(helmet());
   app.use(compression());
   app.enableCors({
@@ -28,7 +39,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(7777);
+  await app.listen(7778);
 
   logger.log(
     `Application environment is ${process.env.NODE_ENV}. Running on: ${await app.getUrl()}`,

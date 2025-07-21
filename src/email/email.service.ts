@@ -38,6 +38,23 @@ export class EmailService {
     await this.sendEmail({ html, subject, to: [to] });
   }
 
+  async sendNewsletter({
+    newsletterSubject,
+    content,
+    to,
+  }: {
+    newsletterSubject: string;
+    content: string;
+    to: string;
+  }) {
+    const { html, subject } = this.emailTemplatesProvider.sendNewsletterEmail({
+      content,
+      subject: newsletterSubject,
+    });
+
+    await this.sendEmail({ html, subject, to: [to] });
+  }
+
   private async sendEmail({ html, subject, to }: SendEmail) {
     try {
       const { data, error } = await this.resend.emails.send({

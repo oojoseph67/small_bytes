@@ -1,8 +1,7 @@
 export enum Resource {
-  SETTINGS = 'settings',
-  PRODUCTS = 'products',
-  USERS = 'users',
-  ROLES = 'roles'
+  NEWSLETTER = 'newsletter',
+  ROLES = 'roles',
+  LEARNER = 'learner',
 }
 
 // sections in the application

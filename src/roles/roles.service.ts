@@ -41,7 +41,16 @@ export class RolesService implements OnModuleInit {
           name: 'admin',
           permissions: [
             {
-              resource: Resource.USERS,
+              resource: Resource.LEARNER,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
+            {
+              resource: Resource.NEWSLETTER,
               actions: [
                 Action.READ,
                 Action.CREATE,
@@ -55,8 +64,12 @@ export class RolesService implements OnModuleInit {
           name: 'learner',
           permissions: [
             {
-              resource: Resource.USERS,
+              resource: Resource.LEARNER,
               actions: [Action.READ, Action.UPDATE],
+            },
+            {
+              resource: Resource.NEWSLETTER,
+              actions: [Action.READ],
             },
           ],
         },

@@ -11,6 +11,8 @@ import { UserModule } from 'src/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RefreshToken, RefreshTokenSchema } from './entities/auth.entity';
 import { AuthGuard } from './guards/auth.guard';
+import { EmailModule } from 'src/email/email.module';
+import { ResetToken, ResetTokenSchema } from './entities/reset-token.entity';
 
 @Module({
   imports: [
@@ -33,9 +35,14 @@ import { AuthGuard } from './guards/auth.guard';
         name: RefreshToken.name,
         schema: RefreshTokenSchema,
       },
+      {
+        name: ResetToken.name,
+        schema: ResetTokenSchema,
+      },
     ]),
 
     UserModule,
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [

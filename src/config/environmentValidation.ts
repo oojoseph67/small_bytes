@@ -16,6 +16,8 @@ export default Joi.object({
   JWT_TOKEN_ISSUER: Joi.string().required(),
   JWT_ACCESS_TOKEN_TIME_TO_LIVE: Joi.number().required(),
   JWT_REFRESH_TOKEN_TIME_TO_LIVE: Joi.number().required(),
+  RESEND_API_KEY: Joi.string().required(),
+  RESEND_FROM_EMAIL: Joi.string().required(),
   // CLOUDINARY_NAME: Joi.string().required(),
   // CLOUDINARY_API_KEY: Joi.string().required(),
   // CLOUDINARY_API_SECRET: Joi.string().required(),

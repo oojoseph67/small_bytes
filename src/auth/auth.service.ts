@@ -18,6 +18,11 @@ import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { User } from 'src/user/entities/user.entity';
 import { AccessTokenPayload, TokenResponse } from './type/auth.type';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { nanoid } from 'nanoid';
+import { ResetToken } from './entities/reset-token.entity';
+import { EmailService } from 'src/email/email.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -25,12 +30,17 @@ export class AuthService {
     @InjectModel(RefreshToken.name)
     private refreshTokenModel: Model<RefreshToken>,
 
+    @InjectModel(ResetToken.name)
+    private resetTokenModel: Model<ResetToken>,
+
     @Inject(forwardRef(() => HashingProvider))
     private hashingProvider: HashingProvider,
 
     private usersService: UserService,
 
     private generateTokenProvider: GenerateTokenProvider,
+
+    private emailService: EmailService,
   ) {}
 
   async signup(signupDto: SignupDto): Promise<UserResponseDto> {
@@ -87,7 +97,7 @@ export class AuthService {
     try {
       // verify the refresh token first
       await this.generateTokenProvider.verifyRefreshToken(refreshToken);
-      
+
       const token = await this.refreshTokenModel.findOne({
         token: refreshToken,
         expiryDate: { $gte: new Date() },
@@ -101,7 +111,9 @@ export class AuthService {
       }
 
       await this.findAndDeleteRefreshToken(token.userId);
-      const user = await this.usersService.findUserById(token.userId.toString());
+      const user = await this.usersService.findUserById(
+        token.userId.toString(),
+      );
 
       // generate new token
       return await this.generateUserTokens({ user });
@@ -109,10 +121,7 @@ export class AuthService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new HttpException(
-        'Invalid refresh token',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -133,7 +142,6 @@ export class AuthService {
       );
     }
   }
-
 
   async changePassword(
     changePasswordDto: ChangePasswordDto,
@@ -179,13 +187,14 @@ export class AuthService {
 
       existingUser.password = newHashedPassword;
       await existingUser.save();
-      
+
       // Invalidate all existing sessions for this user
       await this.invalidateAllUserSessions(userId);
-      
-      return { 
-        message: 'Password changed successfully. Please login again with your new password.',
-        requiresReauth: true 
+
+      return {
+        message:
+          'Password changed successfully. Please login again with your new password.',
+        requiresReauth: true,
       };
     } catch (error: any) {
       if (error instanceof HttpException) {
@@ -194,6 +203,105 @@ export class AuthService {
 
       throw new HttpException(
         `Error changing password: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const { email } = forgotPasswordDto;
+
+    const existingUser = await this.usersService.findUserByEmail(email);
+
+    // FOR SECURITY REASONS IT IS BEST TO NOT THROW AN ERROR. IF THE USER EXISTS WE SEND EMAIL IF THEY DONT WE DONT
+    // if (!existingUser) {
+    //   throw new HttpException(
+    //     `User with email: ${email} does not exist`,
+    //     HttpStatus.BAD_REQUEST,
+    //   );
+    // }
+
+    if (existingUser) {
+      const resetToken = nanoid(64);
+      const { email, _id: userId } = existingUser;
+
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + 1); // expires in an hour
+
+      try {
+        await this.resetTokenModel.create({
+          token: resetToken,
+          userId,
+          expiryDate,
+        });
+      } catch (error) {
+        throw new HttpException(
+          `Error saving reset token`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      await this.emailService.sendForgotPasswordEmail({
+        to: email,
+        token: resetToken,
+      });
+    }
+
+    return {
+      message: `If user with email: ${email} exists, they will receive an email with a verification link attached`,
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { newPassword, resetToken } = resetPasswordDto;
+
+    try {
+      const codeExist = await this.resetTokenModel.findOne({
+        token: resetToken,
+      });
+
+      if (!codeExist) {
+        throw new HttpException(`Invalid reset token`, HttpStatus.BAD_REQUEST);
+      }
+
+      const isCodeExpired = codeExist.expiryDate < new Date();
+
+      if (isCodeExpired) {
+        throw new HttpException(
+          `Reset token has expired`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const user = await this.usersService.findUserById(
+        codeExist.userId.toString(),
+      );
+
+      if (!user) {
+        throw new HttpException(`User does not exist`, HttpStatus.BAD_REQUEST);
+      }
+
+      const newHashedPassword = await this.hashingProvider.hashPassword({
+        password: newPassword,
+      });
+      user.password = newHashedPassword;
+      await user.save();
+
+      await this.resetTokenModel.findOneAndDelete({
+        token: resetToken,
+      });
+
+      return {
+        message: 'Password changed successfully. Login',
+        requiresReauth: true,
+      };
+    } catch (error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error Resetting Password: ${error.message}`,
         HttpStatus.BAD_REQUEST,
       );
     }

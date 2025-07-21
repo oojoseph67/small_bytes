@@ -1,13 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude } from 'class-transformer';
 import { Document, HydratedDocument, Types } from 'mongoose';
+import { Roles } from 'src/roles/entities/role.entity';
 
 @Schema()
 export class User extends Document {
   @Prop({
     required: true,
   })
-  name: string;
+  firstName: string;
+
+  @Prop({
+    required: true,
+  })
+  lastName: string;
 
   @Prop({
     required: true,
@@ -23,9 +29,9 @@ export class User extends Document {
 
   @Prop({
     type: Types.ObjectId,
-    ref: 'roles'
+    ref: Roles.name,
   })
-  roleId: Types.ObjectId
+  roleId: Types.ObjectId;
 }
 
 export type UserDocument = HydratedDocument<User>;

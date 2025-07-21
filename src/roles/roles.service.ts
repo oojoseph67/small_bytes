@@ -49,54 +49,14 @@ export class RolesService implements OnModuleInit {
                 Action.DELETE,
               ],
             },
-            // {
-            //   resource: Resource.RECOMMENDATION,
-            //   actions: [
-            //     Action.READ,
-            //     Action.CREATE,
-            //     Action.UPDATE,
-            //     Action.DELETE,
-            //   ],
-            // },
-            // {
-            //   resource: Resource.PREFERENCE,
-            //   actions: [
-            //     Action.READ,
-            //     Action.CREATE,
-            //     Action.UPDATE,
-            //     Action.DELETE,
-            //   ],
-            // },
           ],
         },
         {
-          name: 'user',
+          name: 'learner',
           permissions: [
             {
               resource: Resource.USERS,
               actions: [Action.READ, Action.UPDATE],
-            },
-            // {
-            //   resource: Resource.RECOMMENDATION,
-            //   actions: [Action.READ],
-            // },
-            // {
-            //   resource: Resource.PREFERENCE,
-            //   actions: [
-            //     Action.CREATE,
-            //     Action.DELETE,
-            //     Action.READ,
-            //     Action.UPDATE,
-            //   ],
-            // },
-          ],
-        },
-        {
-          name: 'guest',
-          permissions: [
-            {
-              resource: Resource.USERS,
-              actions: [Action.READ],
             },
           ],
         },

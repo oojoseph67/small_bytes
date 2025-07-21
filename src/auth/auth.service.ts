@@ -44,14 +44,15 @@ export class AuthService {
   ) {}
 
   async signup(signupDto: SignupDto): Promise<UserResponseDto> {
-    const { password, name, email } = signupDto;
+    const { password, firstName, lastName, email } = signupDto;
 
     const hashedPassword = await this.hashingProvider.hashPassword({
       password,
     });
 
     const user = await this.usersService.create({
-      name,
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
     });

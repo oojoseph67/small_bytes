@@ -30,6 +30,14 @@ export class EmailService {
     await this.sendEmail({ html, subject, to: [to] });
   }
 
+  async sendWelcomeEmail({ to, firstName }: { to: string; firstName: string }) {
+    const { html, subject } = this.emailTemplatesProvider.sendWelcomeEmail({
+      name: firstName,
+    });
+
+    await this.sendEmail({ html, subject, to: [to] });
+  }
+
   private async sendEmail({ html, subject, to }: SendEmail) {
     try {
       const { data, error } = await this.resend.emails.send({
@@ -40,11 +48,11 @@ export class EmailService {
       });
 
       if (error) {
-        console.log({error})
+        console.log({ error });
         this.logger.error(`Error sending mail: ${error}`);
       }
 
-      this.logger.log('send email',{ data });
+      this.logger.log('send email', { data });
     } catch (error: any) {
       this.logger.error(`TryCatch: Error sending mail: ${error}`);
     }

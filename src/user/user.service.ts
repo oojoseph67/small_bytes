@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
@@ -6,19 +6,25 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { RolesService } from 'src/roles/roles.service';
 import { RoleResponseDto } from 'src/roles/dto/role.dto';
+import { NewsletterService } from 'src/newsletter/newsletter.service';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     @InjectModel(User.name)
-    private userModel: Model<User>,
+    private readonly userModel: Model<User>,
 
-    private rolesService: RolesService,
+    private readonly rolesService: RolesService,
+
+    private readonly newsletterService: NewsletterService,
   ) {}
 
   async create(createData: {
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     password: string;
   }): Promise<UserResponseDto> {
     try {
@@ -29,12 +35,25 @@ export class UserService {
         throw new HttpException('Email already exists', HttpStatus.FORBIDDEN);
       }
 
-      const role = await this.rolesService.getRoleByName('user');
+      const role = await this.rolesService.getRoleByName('learner');
 
+      // creating user
       const user = await this.userModel.create({
         ...createData,
         roleId: role._id,
       });
+
+      this.logger.debug(`User created....`);
+      this.logger.debug(`Creating newsletter`);
+
+      await this.newsletterService.create({
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        tags: ['small-bytes', 'blockchain'],
+      });
+
+      this.logger.debug(`Newsletter created`);
 
       return plainToInstance(UserResponseDto, user.toObject());
     } catch (error) {

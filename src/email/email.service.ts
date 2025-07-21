@@ -47,9 +47,12 @@ export class EmailService {
     content: string;
     to: string;
   }) {
+    const link = `${this.frontendUrl}/unsubscribe/?email=${to}`;
+
     const { html, subject } = this.emailTemplatesProvider.sendNewsletterEmail({
       content,
       subject: newsletterSubject,
+      unsubscribeLink: link
     });
 
     await this.sendEmail({ html, subject, to: [to] });

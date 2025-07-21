@@ -37,7 +37,7 @@ export class NewsletterController {
   }
 
   @Post('unsubscribe')
-  @Permissions([{ resource: Resource.NEWSLETTER, actions: [Action.UPDATE] }])
+  // @Permissions([{ resource: Resource.NEWSLETTER, actions: [Action.UPDATE] }])
   unsubscribe(@Query('email') email: string, @Query('reason') reason?: string) {
     return this.newsletterService.unsubscribe(email, reason);
   }

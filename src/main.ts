@@ -8,6 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { ResponseInterceptor } from './interceptor/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,6 +28,7 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
+    new ResponseInterceptor(),
   );
 
   app.setGlobalPrefix('api');

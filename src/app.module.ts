@@ -10,9 +10,16 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
 import { RolesModule } from './roles/roles.module';
+import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [{ limit: 4, ttl: seconds(10), blockDuration: seconds(3) }], // 4 request within 10seconds with block-duration of 5 seconds
+      errorMessage: 'Too many requests... slow down',
+    }),
+
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig],
@@ -38,7 +45,13 @@ import { RolesModule } from './roles/roles.module';
     RolesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

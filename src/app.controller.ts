@@ -5,6 +5,7 @@ import { Permissions } from './roles/decorator/permissions.decorator';
 import { Resource } from './roles/enums/resource.enum';
 import { Action } from './roles/enums/action.enum';
 import { AuthorizationGuard } from './auth/guards/authorization.guard';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @UseGuards(AuthenticationGuard)
 @Controller()
@@ -17,6 +18,12 @@ export class AppController {
   getHello(@Req() req): string {
     const user = req.user;
     return this.appService.getHello();
+  }
+
+  @SkipThrottle()
+  @Get('/hi')
+  getHi() {
+    return 'Hii';
   }
 }
 

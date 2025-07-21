@@ -7,8 +7,9 @@ import { GenerateTokenProvider } from './providers/generate-token.provider';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import jwtConfig from 'src/config/jwt.config';
-import { UserService } from 'src/user/user.service';
 import { UserModule } from 'src/user/user.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { RefreshToken, RefreshTokenSchema } from './entities/auth.entity';
 
 @Module({
   imports: [
@@ -25,6 +26,14 @@ import { UserModule } from 'src/user/user.module';
       }),
       inject: [jwtConfig.KEY],
     }),
+
+    MongooseModule.forFeature([
+      {
+        name: RefreshToken.name,
+        schema: RefreshTokenSchema,
+      },
+    ]),
+
     UserModule,
   ],
   controllers: [AuthController],

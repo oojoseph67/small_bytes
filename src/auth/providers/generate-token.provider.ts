@@ -2,7 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from 'src/config/jwt.config';
-import { User } from 'src/user/entities/user.entity';
+import {
+  AccessTokenPayload,
+  BaseTokenPayload,
+  CreateTokenParams,
+  GenerateTokensParams,
+  RefreshTokenPayload,
+  TokenResponse,
+} from '../type/auth.type';
 
 @Injectable()
 export class GenerateTokenProvider {
@@ -15,21 +22,17 @@ export class GenerateTokenProvider {
     private jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
-  private async createToken<T>({
+  private async createToken<T extends BaseTokenPayload>({
     userId,
     expiresIn,
     payload,
-  }: {
-    userId: number;
-    expiresIn: number;
-    payload?: T;
-  }) {
+  }: CreateTokenParams<T>): Promise<string> {
     // generate jwt(refresh) token for authenticated user
     const signToken = await this.jwtService.signAsync(
       {
         sub: userId,
         ...payload,
-      },
+      } as T,
       {
         expiresIn: expiresIn,
         secret: this.jwtConfiguration.jwtSecret,
@@ -46,12 +49,9 @@ export class GenerateTokenProvider {
    */
   public async generateTokens({
     user,
-  }: {
-    // user: Omit<UserPayload, 'iat' | 'exp' | 'aud' | 'iss'>;
-    user: User;
-  }) {
+  }: GenerateTokensParams): Promise<TokenResponse> {
     const [accessToken, refreshToken] = await Promise.all([
-      await this.createToken({
+      this.createToken<AccessTokenPayload>({
         expiresIn: this.jwtConfiguration.jwtTokenExpiration,
         userId: user._id as number,
         payload: {
@@ -59,9 +59,9 @@ export class GenerateTokenProvider {
         },
       }),
 
-      await this.createToken({
+      this.createToken<RefreshTokenPayload>({
         expiresIn: this.jwtConfiguration.jwtRefreshTokenExpiration,
-        userId: user.id,
+        userId: user._id as number,
       }),
     ]);
 
@@ -69,5 +69,13 @@ export class GenerateTokenProvider {
       accessToken,
       refreshToken,
     };
+  }
+
+  public async verifyTokens(
+    token: string,
+  ): Promise<RefreshTokenPayload | AccessTokenPayload> {
+    return await this.jwtService.verifyAsync(token, {
+      secret: this.jwtConfiguration.jwtSecret,
+    });
   }
 }

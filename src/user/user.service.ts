@@ -59,4 +59,17 @@ export class UserService {
       );
     }
   }
+
+  async findUserById(id: string): Promise<User> {
+    try {
+      const user = this.userModel.findById(id);
+
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        `Error finding user with id ${id}... : ${error.message}`,
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
+  }
 }

@@ -2,7 +2,7 @@ import { User } from 'src/user/entities/user.entity';
 
 // Type definitions for better type safety
 export interface BaseTokenPayload {
-  sub: number;
+  userId: string;
   iat: number;
   exp: number;
 }
@@ -16,9 +16,9 @@ export interface RefreshTokenPayload extends BaseTokenPayload {
 }
 
 export interface CreateTokenParams<T = BaseTokenPayload> {
-  userId: number;
+  userId: string;
   expiresIn: number;
-  payload?: Omit<T, 'sub' | 'iat' | 'exp'>;
+  payload?: Omit<T, 'userId' | 'iat' | 'exp'>;
 }
 
 export interface GenerateTokensParams {

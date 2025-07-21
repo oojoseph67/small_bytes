@@ -30,7 +30,7 @@ export class GenerateTokenProvider {
     // generate jwt(refresh) token for authenticated user
     const signToken = await this.jwtService.signAsync(
       {
-        sub: userId,
+        userId: userId,
         ...payload,
       } as T,
       {
@@ -53,7 +53,7 @@ export class GenerateTokenProvider {
     const [accessToken, refreshToken] = await Promise.all([
       this.createToken<AccessTokenPayload>({
         expiresIn: this.jwtConfiguration.jwtTokenExpiration,
-        userId: user._id as number,
+        userId: user._id.toString(),
         payload: {
           email: user.email,
         },
@@ -61,7 +61,7 @@ export class GenerateTokenProvider {
 
       this.createToken<RefreshTokenPayload>({
         expiresIn: this.jwtConfiguration.jwtRefreshTokenExpiration,
-        userId: user._id as number,
+        userId: user._id.toString(),
       }),
     ]);
 

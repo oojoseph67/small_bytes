@@ -16,7 +16,8 @@ import { RefreshToken } from './entities/auth.entity';
 import { Model, Types } from 'mongoose';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { User } from 'src/user/entities/user.entity';
-import { TokenResponse } from './type/auth.type';
+import { AccessTokenPayload, TokenResponse } from './type/auth.type';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -83,23 +84,119 @@ export class AuthService {
   async refresh(refreshTokenDto: RefreshTokenDto) {
     const { refreshToken } = refreshTokenDto;
 
-    const token = await this.refreshTokenModel.findOne({
-      token: refreshToken,
-      expiryDate: { $gte: new Date() },
-    });
+    try {
+      // verify the refresh token first
+      await this.generateTokenProvider.verifyRefreshToken(refreshToken);
+      
+      const token = await this.refreshTokenModel.findOne({
+        token: refreshToken,
+        expiryDate: { $gte: new Date() },
+      });
 
-    if (!token) {
+      if (!token) {
+        throw new HttpException(
+          'Please login. Invalid Refresh Token',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      await this.findAndDeleteRefreshToken(token.userId);
+      const user = await this.usersService.findUserById(token.userId.toString());
+
+      // generate new token
+      return await this.generateUserTokens({ user });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
-        'Please login. Invalid Refresh Token',
+        'Invalid refresh token',
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
 
-    await this.findAndDeleteRefreshToken(token.userId);
-    const user = await this.usersService.findUserById(token.userId.toString());
+  async logout(userId: string, refreshToken?: string) {
+    try {
+      if (refreshToken) {
+        // Logout from specific session (current refresh token)
+        await this.invalidateSpecificSession(refreshToken);
+      } else {
+        // Logout from all sessions
+        await this.invalidateAllUserSessions(userId);
+      }
+      return { message: 'Logged out successfully' };
+    } catch (error) {
+      throw new HttpException(
+        `Error during logout: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
-    // generate new token
-    return await this.generateUserTokens({ user });
+
+  async changePassword(
+    changePasswordDto: ChangePasswordDto,
+    user: AccessTokenPayload,
+  ) {
+    const { newPassword, oldPassword } = changePasswordDto;
+    const { userId } = user;
+
+    try {
+      // find user
+      const existingUser = await this.usersService.findUserById(userId);
+
+      if (!existingUser) {
+        throw new HttpException(`User doesnt exist`, HttpStatus.BAD_REQUEST);
+      }
+
+      // compare old password with new the new password in db
+      const { password: oldHashedPassword } = existingUser;
+      const isPasswordCorrect = await this.hashingProvider.comparePasswords({
+        password: oldPassword,
+        hashedPassword: oldHashedPassword,
+      });
+
+      if (!isPasswordCorrect) {
+        throw new HttpException(
+          `Old password doesnt match`,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      // check if new password === oldpassword then throw error
+      if (newPassword === oldPassword) {
+        throw new HttpException(
+          'New password cannot be the same as old password',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // hash and change user password
+      const newHashedPassword = await this.hashingProvider.hashPassword({
+        password: newPassword,
+      });
+
+      existingUser.password = newHashedPassword;
+      await existingUser.save();
+      
+      // Invalidate all existing sessions for this user
+      await this.invalidateAllUserSessions(userId);
+      
+      return { 
+        message: 'Password changed successfully. Please login again with your new password.',
+        requiresReauth: true 
+      };
+    } catch (error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error changing password: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   private async generateUserTokens({
@@ -149,7 +246,35 @@ export class AuthService {
     } catch (error) {
       throw new HttpException(
         `Error deleting refresh token : ${error.message}`,
-        HttpStatus.BAD_GATEWAY,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  private async invalidateAllUserSessions(userId: string) {
+    try {
+      // Delete all refresh tokens for this user
+      await this.refreshTokenModel.deleteMany({
+        userId: new Types.ObjectId(userId),
+      });
+    } catch (error) {
+      throw new HttpException(
+        `Error invalidating sessions: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  private async invalidateSpecificSession(refreshToken: string) {
+    try {
+      // Delete specific refresh token
+      await this.refreshTokenModel.findOneAndDelete({
+        token: refreshToken,
+      });
+    } catch (error) {
+      throw new HttpException(
+        `Error invalidating session: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

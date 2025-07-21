@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
 
     if (!token) {
       throw new HttpException(
-        'No token passed. Pass AccessToken',
+        'No token passed. Login to pass accessToken',
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -41,5 +41,13 @@ export class AuthGuard implements CanActivate {
 }
 
 /**
- * THIS GUARD MAKE SURE THAT ANYONE MAKING A REQUEST TO ANY OF OUR ENDPOINT PASSES A LEGIT ACCESS_TOKEN
+ * A Guard in NestJS acts like a security checkpoint that runs before your route handlers.
+ * It can either allow the request to proceed or block it entirely.
+ *
+ * This AuthGuard specifically:
+ * 1. Extracts the JWT access token from the Authorization header
+ * 2. Verifies the token is valid and not expired
+ * 3. Decodes the user information from the token
+ * 4. Attaches the user data to the request object for use in controllers
+ * 5. Blocks requests that don't have a valid token
  */

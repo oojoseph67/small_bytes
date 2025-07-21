@@ -15,6 +15,8 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { AuthGuard } from './guards/auth.guard';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { LogoutDto } from './dto/logout.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -32,10 +34,8 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  // @UseGuards(AuthGuard)
   @Post('refresh')
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto, @Req() req) {
-    console.log({ req });
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refresh(refreshTokenDto);
   }
 
@@ -45,6 +45,27 @@ export class AuthController {
     console.log({ user: req.user });
     return req.user;
   }
+
+  @UseGuards(AuthGuard)
+  @Post('logout')
+  async logout(@Req() req, @Body() logoutDto?: LogoutDto) {
+    const user = req.user;
+    return this.authService.logout(user.userId, logoutDto?.refreshToken);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('change-password')
+  async changePassword(
+    @Req() req,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const user = req.user;
+    return this.authService.changePassword(changePasswordDto, user);
+  }
+
+  async forgotPassword() {}
+
+  async resetPassword() {}
 }
 
 /**
@@ -67,5 +88,29 @@ export class AuthController {
  *      c) Retry the original failed request
  *    - If refresh fails (refresh token expired), redirect to login
  *
- * 4. SECURITY: Refresh tokens are rotated on each use to prevent token reuse attacks
+ * 4. SECURITY FEATURES:
+ *    - Refresh tokens are rotated on each use to prevent token reuse attacks
+ *    - Password change invalidates ALL existing sessions (forces re-login)
+ *    - Logout can invalidate specific session or all sessions
+ *    - JWT tokens are verified on every protected request
  */
+
+// example frontend handling change password
+// const changePassword = async (oldPassword, newPassword) => {
+//   const response = await api.post('/auth/change-password', {
+//     oldPassword,
+//     newPassword
+//   });
+  
+//   if (response.data.requiresReauth) {
+//     // Clear local tokens
+//     localStorage.removeItem('accessToken');
+//     localStorage.removeItem('refreshToken');
+    
+//     // Redirect to login
+//     router.push('/login');
+    
+//     // Show message
+//     showMessage('Password changed! Please login with your new password.');
+//   }
+// };

@@ -60,7 +60,7 @@ export class UserService {
     }
   }
 
-  async findUserById(id: string): Promise<User> {
+  async findUserById(id: string | number): Promise<User> {
     try {
       const user = this.userModel.findById(id);
 

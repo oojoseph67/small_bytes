@@ -127,6 +127,50 @@ export class NewsletterService {
     }
   }
 
+  async getAllActiveSubscribers() {
+    try {
+      const emails = await this.getEmails();
+
+      return emails.filter((email) => {
+        return email.status === 'active'
+      })
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      this.logger.error(`Error newsletter`);
+
+      throw new HttpException(
+        `Error creating user newsletter`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAllUnSubscribedEmails() {
+    try {
+      const emails = await this.getEmails();
+
+      return emails.filter((email) => {
+        return email.status === 'unsubscribed'
+      })
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      this.logger.error(`Error newsletter`);
+
+      throw new HttpException(
+        `Error creating user newsletter`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   private async getEmails(): Promise<Newsletter[]> {
     try {
       return await this.newsletterModel.find().exec();

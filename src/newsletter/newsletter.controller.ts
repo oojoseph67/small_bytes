@@ -36,6 +36,18 @@ export class NewsletterController {
     return this.newsletterService.postNewsletter(postNewsletterDto);
   }
 
+  @Get('/active-subscribers')
+  @Permissions([{ resource: Resource.ADMIN, actions: [Action.READ] }])
+  activeSubscribers() {
+    return this.newsletterService.getAllActiveSubscribers();
+  }
+
+  @Get('/unsubscribes')
+  @Permissions([{ resource: Resource.ADMIN, actions: [Action.READ] }])
+  unsubscribes() {
+    return this.newsletterService.getAllUnSubscribedEmails();
+  }
+
   @Post('unsubscribe')
   // @Permissions([{ resource: Resource.NEWSLETTER, actions: [Action.UPDATE] }])
   unsubscribe(@Query('email') email: string, @Query('reason') reason?: string) {

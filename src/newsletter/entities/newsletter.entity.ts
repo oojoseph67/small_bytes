@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude } from 'class-transformer';
 import { Document, HydratedDocument, Types } from 'mongoose';
+
+// NewsletterSubscribers
+
+type Status = 'active' | 'inactive' | 'unsubscribed';
 
 @Schema({ timestamps: true })
 export class Newsletter extends Document {
@@ -17,7 +20,7 @@ export class Newsletter extends Document {
     default: 'active',
     enum: ['active', 'inactive', 'unsubscribed'],
   })
-  status: string;
+  status: Status;
 
   @Prop({
     required: false,

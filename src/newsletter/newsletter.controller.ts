@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { NewsletterService } from './newsletter.service';
 import { CreateNewsletterDto } from './dto/create-newsletter.dto';
@@ -33,5 +34,11 @@ export class NewsletterController {
   @Permissions([{ resource: Resource.NEWSLETTER, actions: [Action.CREATE] }])
   postNewsletter(@Body() postNewsletterDto: PostNewsletterDto) {
     return this.newsletterService.postNewsletter(postNewsletterDto);
+  }
+
+  @Post('unsubscribe')
+  @Permissions([{ resource: Resource.NEWSLETTER, actions: [Action.UPDATE] }])
+  unsubscribe(@Query('email') email: string, @Query('reason') reason?: string) {
+    return this.newsletterService.unsubscribe(email, reason);
   }
 }

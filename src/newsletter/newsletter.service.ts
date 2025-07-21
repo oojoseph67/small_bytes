@@ -76,6 +76,57 @@ export class NewsletterService {
     }
   }
 
+  async unsubscribe(email: string, reason?: string) {
+    try {
+      const existingSubscription = await this.newsletterModel
+        .findOne({ email })
+        .exec();
+
+      if (!existingSubscription) {
+        throw new HttpException(
+          'Email not found in newsletter subscription',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (existingSubscription.status === 'unsubscribed') {
+        return { message: 'Already unsubscribed from newsletter' };
+      }
+
+      const result = await this.newsletterModel
+        .findOneAndUpdate(
+          { email },
+          {
+            status: 'unsubscribed',
+            unsubscribedAt: new Date(),
+            ...(reason && { unsubscribeReason: reason }),
+          },
+          { new: true },
+        )
+        .exec();
+
+      this.logger.debug(`User unsubscribed: ${email}`);
+
+      return {
+        message: 'Successfully unsubscribed from newsletter',
+        email: result.email,
+        unsubscribedAt: result.unsubscribedAt,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      this.logger.error(
+        `Error unsubscribing from newsletter: ${error.message}`,
+      );
+      throw new HttpException(
+        'Error unsubscribing from newsletter',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   private async getEmails(): Promise<Newsletter[]> {
     try {
       return await this.newsletterModel.find().exec();

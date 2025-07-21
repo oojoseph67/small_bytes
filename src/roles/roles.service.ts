@@ -69,7 +69,7 @@ export class RolesService implements OnModuleInit {
             },
             {
               resource: Resource.NEWSLETTER,
-              actions: [Action.READ],
+              actions: [Action.READ, Action.UPDATE],
             },
           ],
         },

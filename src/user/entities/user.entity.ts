@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude } from 'class-transformer';
-import { Document, HydratedDocument } from 'mongoose';
+import { Document, HydratedDocument, Types } from 'mongoose';
 
 @Schema()
 export class User extends Document {
@@ -20,6 +20,12 @@ export class User extends Document {
     required: true,
   })
   password: string;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'roles'
+  })
+  roleId: Types.ObjectId
 }
 
 export type UserDocument = HydratedDocument<User>;

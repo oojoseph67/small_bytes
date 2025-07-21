@@ -2,7 +2,8 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Roles } from './entities/role.entity';
 import { Model } from 'mongoose';
-import { CreateRoleDto } from './dto/role.dto';
+import { CreateRoleDto, RoleResponseDto } from './dto/role.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class RolesService {
@@ -11,7 +12,7 @@ export class RolesService {
     private roleModel: Model<Roles>,
   ) {}
 
-  async createRole(role: CreateRoleDto): Promise<Roles> {
+  async createRole(role: CreateRoleDto) {
     try {
       const existingRole = await this.roleModel.findOne({ name: role.name });
 
@@ -24,7 +25,7 @@ export class RolesService {
 
       const newRole = await this.roleModel.create(role);
 
-      return newRole;
+      return plainToInstance(RoleResponseDto, newRole.toObject());
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -37,7 +38,26 @@ export class RolesService {
     }
   }
 
-  async getRoleById(roleId: string): Promise<Roles> {
+  async getAllRoles() {
+    try {
+      const roles = await this.roleModel.find().exec();
+
+      return roles.map((role) => 
+        plainToInstance(RoleResponseDto, role.toObject())
+      );
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Failed to retrieve roles',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getRoleById(roleId: string) {
     try {
       const role = await this.roleModel.findById(roleId);
 
@@ -48,7 +68,7 @@ export class RolesService {
         );
       }
 
-      return role;
+      return plainToInstance(RoleResponseDto, role.toObject());
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -61,11 +81,20 @@ export class RolesService {
     }
   }
 
-  async getAllRoles(): Promise<Roles[]> {
+  async getRoleByName(name: string) {
     try {
-      const role = await this.roleModel.find().exec();
+      const role = await this.roleModel.findOne({
+        name,
+      });
 
-      return role;
+      if (!role) {
+        throw new HttpException(
+          `Role with name '${name}' not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      return plainToInstance(RoleResponseDto, role.toObject());
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

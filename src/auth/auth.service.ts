@@ -225,6 +225,17 @@ export class AuthService {
       const resetToken = nanoid(64);
       const { email, _id: userId } = existingUser;
 
+      const existingResetToken = await this.resetTokenModel.findOne({
+        userId,
+        expiryDate: { $gte: new Date() },
+      });
+
+      if (existingResetToken) {
+        await this.resetTokenModel.findOneAndDelete({
+          _id: existingResetToken._id,
+        });
+      }
+
       const expiryDate = new Date();
       expiryDate.setHours(expiryDate.getHours() + 1); // expires in an hour
 

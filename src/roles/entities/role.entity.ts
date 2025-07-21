@@ -3,7 +3,7 @@ import { Document, HydratedDocument } from 'mongoose';
 import { Resource } from '../enums/resource.enum';
 import { Action } from '../enums/action.enum';
 
-@Schema()
+@Schema({ _id: false })
 class Permission {
   @Prop({
     required: true,
@@ -13,12 +13,8 @@ class Permission {
 
   @Prop({
     required: true,
-    type: [
-      {
-        type: String,
-        enum: Action,
-      },
-    ],
+    type: [String],
+    enum: Action,
   })
   actions: Action[];
 }
@@ -27,6 +23,7 @@ class Permission {
 export class Roles extends Document {
   @Prop({
     required: true,
+    unique: true,
   })
   name: string;
 

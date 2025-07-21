@@ -1,18 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
-import { SignupDto } from 'src/auth/dto/signup.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { RolesService } from 'src/roles/roles.service';
+import { RoleResponseDto } from 'src/roles/dto/role.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
+
+    private rolesService: RolesService,
   ) {}
 
   async create(createData: {
@@ -28,8 +29,11 @@ export class UserService {
         throw new HttpException('Email already exists', HttpStatus.FORBIDDEN);
       }
 
+      const role = await this.rolesService.getRoleByName('user');
+
       const user = await this.userModel.create({
         ...createData,
+        roleId: role._id,
       });
 
       return plainToInstance(UserResponseDto, user.toObject());
@@ -71,5 +75,15 @@ export class UserService {
         HttpStatus.BAD_GATEWAY,
       );
     }
+  }
+
+  async getUserPermissions(userId: string): Promise<RoleResponseDto> {
+    const user = await this.findUserById(userId);
+
+    const userPermissions = await this.rolesService.getRoleById(
+      user.roleId.toString(),
+    );
+
+    return userPermissions;
   }
 }

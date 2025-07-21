@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { HashingProvider } from './providers/hashing.provider';
@@ -10,10 +10,11 @@ import jwtConfig from 'src/config/jwt.config';
 import { UserModule } from 'src/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RefreshToken, RefreshTokenSchema } from './entities/auth.entity';
-import { AuthGuard } from './guards/auth.guard';
+import { AuthenticationGuard } from './guards/authentication.guard';
 import { EmailModule } from 'src/email/email.module';
 import { ResetToken, ResetTokenSchema } from './entities/reset-token.entity';
 
+@Global()
 @Module({
   imports: [
     ConfigModule.forFeature(jwtConfig),
@@ -52,8 +53,8 @@ import { ResetToken, ResetTokenSchema } from './entities/reset-token.entity';
       useClass: BcryptProvider,
     },
     GenerateTokenProvider,
-    AuthGuard,
+    AuthenticationGuard,
   ],
-  exports: [AuthGuard],
+  exports: [AuthenticationGuard, GenerateTokenProvider],
 })
 export class AuthModule {}

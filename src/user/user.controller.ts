@@ -19,4 +19,9 @@ export class UserController {
   create(@Body() createUserDto: CreateUserDto) {
     return '';
   }
+
+  @Get('/permissions')
+  getUserPermissions(@Body('userId') userId: string) {
+    return this.userService.getUserPermissions(userId);
+  }
 }

@@ -13,7 +13,7 @@ import { AccessTokenPayload } from '../type/auth.type';
 export const REQUEST_USER_KEY = 'user';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthenticationGuard implements CanActivate {
   constructor(private generateTokenProvider: GenerateTokenProvider) {}
 
   private extractRequestFromHeader({ request }: { request: Request }) {

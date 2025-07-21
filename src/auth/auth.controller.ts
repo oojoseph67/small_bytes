@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
-import { AuthGuard } from './guards/auth.guard';
+import { AuthenticationGuard } from './guards/authentication.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LogoutDto } from './dto/logout.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -41,21 +41,21 @@ export class AuthController {
     return this.authService.refresh(refreshTokenDto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthenticationGuard)
   @Get('demo')
   demo(@Req() req) {
     console.log({ user: req.user });
     return req.user;
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthenticationGuard)
   @Post('logout')
   async logout(@Req() req, @Body() logoutDto?: LogoutDto) {
     const user = req.user;
     return this.authService.logout(user.userId, logoutDto?.refreshToken);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthenticationGuard)
   @Post('change-password')
   async changePassword(
     @Req() req,
@@ -67,12 +67,12 @@ export class AuthController {
 
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto)
+    return this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @Post('/reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(resetPasswordDto)
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }
 
@@ -109,15 +109,15 @@ export class AuthController {
 //     oldPassword,
 //     newPassword
 //   });
-  
+
 //   if (response.data.requiresReauth) {
 //     // Clear local tokens
 //     localStorage.removeItem('accessToken');
 //     localStorage.removeItem('refreshToken');
-    
+
 //     // Redirect to login
 //     router.push('/login');
-    
+
 //     // Show message
 //     showMessage('Password changed! Please login with your new password.');
 //   }

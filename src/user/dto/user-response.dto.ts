@@ -11,6 +11,10 @@ export class UserResponseDto {
   @Expose()
   email: string;
 
+  @Expose()
+  @Transform(({ obj }) => obj._id?.toString())
+  roleId: string;
+
   @Exclude()
   password: string;
 }

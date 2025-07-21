@@ -1,13 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  Logger,
-  ValidationPipe,
-  ClassSerializerInterceptor,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
-import * as compression from 'compression';
+import compression from 'compression';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 
 async function bootstrap() {
@@ -26,10 +21,7 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector)),
-    new ResponseInterceptor(),
-  );
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
   app.setGlobalPrefix('api');
 
@@ -41,7 +33,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(7778);
+  await app.listen(7779);
 
   logger.log(
     `Application environment is ${process.env.NODE_ENV}. Running on: ${await app.getUrl()}`,

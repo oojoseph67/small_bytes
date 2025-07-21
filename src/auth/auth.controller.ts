@@ -35,9 +35,25 @@ export class AuthController {
   }
 }
 
-
 /**
- * FLOW: when a user logins in and the accessToken expires, the frontend sends a request to the refreshToken
- *       endpoint to get a new accessToken and we create a new accessToken and refreshToken and send it to the
- *       frontend
+ * ACCESS TOKEN & REFRESH TOKEN FLOW:
+ *
+ * 1. ACCESS TOKEN: Short-lived token (usually 15-60 minutes) used for API authentication
+ *    - Sent with every API request in Authorization header
+ *    - Contains user identity and permissions
+ *    - When expired, API returns 401 Unauthorized
+ *
+ * 2. REFRESH TOKEN: Long-lived token (usually 7-30 days) used to get new access tokens
+ *    - Stored securely (httpOnly cookie or secure storage)
+ *    - Not sent with every request
+ *    - Used only when access token expires
+ *
+ * 3. FRONTEND REFRESH LOGIC:
+ *    - When API returns 401, frontend should:
+ *      a) Call /auth/refresh with the refresh token
+ *      b) Get new access token and refresh token
+ *      c) Retry the original failed request
+ *    - If refresh fails (refresh token expired), redirect to login
+ *
+ * 4. SECURITY: Refresh tokens are rotated on each use to prevent token reuse attacks
  */

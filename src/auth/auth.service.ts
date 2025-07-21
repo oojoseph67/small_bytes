@@ -69,6 +69,7 @@ export class AuthService {
       throw new HttpException(`Incorrect Password`, HttpStatus.UNAUTHORIZED);
     }
 
+    await this.findAndDeleteRefreshToken(user._id as Types.ObjectId);
     const { accessToken, refreshToken } = await this.generateUserTokens({
       user,
     });
@@ -124,7 +125,7 @@ export class AuthService {
   }) {
     try {
       const refreshTokenPayload =
-        await this.generateTokenProvider.verifyTokens(refreshToken);
+        await this.generateTokenProvider.verifyRefreshToken(refreshToken);
       const date = new Date(refreshTokenPayload.exp * 1000);
 
       this.refreshTokenModel.create({

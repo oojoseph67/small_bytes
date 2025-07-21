@@ -10,6 +10,7 @@ import jwtConfig from 'src/config/jwt.config';
 import { UserModule } from 'src/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RefreshToken, RefreshTokenSchema } from './entities/auth.entity';
+import { AuthGuard } from './guards/auth.guard';
 
 @Module({
   imports: [
@@ -44,6 +45,8 @@ import { RefreshToken, RefreshTokenSchema } from './entities/auth.entity';
       useClass: BcryptProvider,
     },
     GenerateTokenProvider,
+    AuthGuard,
   ],
+  exports: [AuthGuard],
 })
 export class AuthModule {}

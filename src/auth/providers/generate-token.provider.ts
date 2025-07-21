@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from 'src/config/jwt.config';
@@ -71,11 +71,37 @@ export class GenerateTokenProvider {
     };
   }
 
-  public async verifyTokens(
+  private async verifyTokens(
     token: string,
   ): Promise<RefreshTokenPayload | AccessTokenPayload> {
-    return await this.jwtService.verifyAsync(token, {
-      secret: this.jwtConfiguration.jwtSecret,
-    });
+    try {
+      return await this.jwtService.verifyAsync(token, {
+        secret: this.jwtConfiguration.jwtSecret,
+      });
+    } catch (error) {
+      throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  public async verifyAccessToken(token: string): Promise<AccessTokenPayload> {
+    const payload = await this.verifyTokens(token);
+    
+    // Type guard to ensure it's an AccessTokenPayload
+    if ('email' in payload) {
+      return payload as AccessTokenPayload;
+    }
+    
+    throw new HttpException('Invalid access token', HttpStatus.UNAUTHORIZED);
+  }
+
+  public async verifyRefreshToken(token: string): Promise<RefreshTokenPayload> {
+    const payload = await this.verifyTokens(token);
+    
+    // Type guard to ensure it's a RefreshTokenPayload
+    if (!('email' in payload)) {
+      return payload as RefreshTokenPayload;
+    }
+    
+    throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
   }
 }

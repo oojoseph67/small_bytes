@@ -7,11 +7,14 @@ import {
   Param,
   Delete,
   Logger,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { AuthGuard } from './guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,9 +32,18 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  // @UseGuards(AuthGuard)
   @Post('refresh')
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto, @Req() req) {
+    console.log({ req });
     return this.authService.refresh(refreshTokenDto);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('demo')
+  demo(@Req() req) {
+    console.log({ user: req.user });
+    return req.user;
   }
 }
 

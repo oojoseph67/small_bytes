@@ -23,6 +23,7 @@ import {
   QuizToLessonDto,
   UpdateLessonDto,
 } from './dto/lesson.dto';
+import { CreateQuizDto, UpdateQuizDto } from './dto/quiz.dto';
 
 @Controller('academy')
 export class AcademyController {
@@ -158,6 +159,27 @@ export class AcademyController {
   @Delete('quiz/:id')
   async deleteQuiz(@Param('id') id: string) {
     return this.academyService.deleteQuiz(id);
+  }
+
+  /**
+   * QUIZ SERVICE
+   */
+  @Get('quiz/:id')
+  async getSingleQuiz(@Param('id') id: string) {
+    return this.academyService.getQuizById(id);
+  }
+
+  @Post('quiz')
+  async createQuiz(@Body() createQuizDto: CreateQuizDto) {
+    return this.academyService.createQuiz(createQuizDto);
+  }
+
+  @Patch('quiz/:id')
+  async updateQuiz(
+    @Body() updateQuizDto: UpdateQuizDto,
+    @Param('id') id: string,
+  ) {
+    return this.academyService.updateQuiz({ id, updateQuizDto });
   }
 }
 

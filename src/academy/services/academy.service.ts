@@ -13,6 +13,7 @@ import {
   QuizToLessonDto,
   UpdateLessonDto,
 } from '../dto/lesson.dto';
+import { CreateQuizDto, UpdateQuizDto } from '../dto/quiz.dto';
 
 @Injectable()
 export class AcademyService {
@@ -185,5 +186,33 @@ export class AcademyService {
 
   async deleteQuiz(id: string) {
     return await this.lessonService.deleteLesson(id);
+  }
+
+  /**
+   * QUIZ SERVICE
+   */
+
+  async createQuiz(createQuizDto: CreateQuizDto) {
+    return await this.quizService.createQuiz(createQuizDto);
+  }
+
+  async updateQuiz({
+    updateQuizDto,
+    id,
+  }: {
+    id: string;
+    updateQuizDto: UpdateQuizDto;
+  }) {
+    return await this.quizService.updateQuiz({ quizId: id, updateQuizDto });
+  }
+
+  async getQuizById(id: string) {
+    const quiz = await this.quizService.findQuizById(id);
+
+    if (!quiz) {
+      throw new HttpException('Quiz not found', HttpStatus.NOT_FOUND);
+    }
+
+    return quiz;
   }
 }

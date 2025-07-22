@@ -18,3 +18,16 @@ export class UserResponseDto {
   @Exclude()
   password: string;
 }
+
+export class LoginResponseDto {
+  @Expose()
+  accessToken: string
+
+  @Expose()
+  refreshToken: string
+}
+
+export class SignUpResponseDto {
+  user: UserResponseDto
+  login: LoginResponseDto
+}

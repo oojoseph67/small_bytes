@@ -8,7 +8,11 @@ import {
 import { HashingProvider } from './providers/hashing.provider';
 import { SignupDto } from './dto/signup.dto';
 import { UserService } from 'src/user/user.service';
-import { UserResponseDto } from 'src/user/dto/user-response.dto';
+import {
+  LoginResponseDto,
+  SignUpResponseDto,
+  UserResponseDto,
+} from 'src/user/dto/user-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { GenerateTokenProvider } from './providers/generate-token.provider';
 import { InjectModel } from '@nestjs/mongoose';
@@ -43,7 +47,10 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
-  async signup(signupDto: SignupDto): Promise<UserResponseDto> {
+  async signup(
+    signupDto: SignupDto,
+    code?: string,
+  ): Promise<SignUpResponseDto> {
     const { password, firstName, lastName, email } = signupDto;
 
     const hashedPassword = await this.hashingProvider.hashPassword({
@@ -55,12 +62,15 @@ export class AuthService {
       lastName,
       email,
       password: hashedPassword,
+      code,
     });
 
-    return user;
+    const login = await this.login({ email, password });
+
+    return { user, login };
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
 
     const user = await this.usersService.findUserByEmail(email);

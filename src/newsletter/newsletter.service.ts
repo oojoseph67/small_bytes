@@ -132,9 +132,8 @@ export class NewsletterService {
       const emails = await this.getEmails();
 
       return emails.filter((email) => {
-        return email.status === 'active'
-      })
-
+        return email.status === 'active';
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -154,9 +153,8 @@ export class NewsletterService {
       const emails = await this.getEmails();
 
       return emails.filter((email) => {
-        return email.status === 'unsubscribed'
-      })
-
+        return email.status === 'unsubscribed';
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -187,6 +185,16 @@ export class NewsletterService {
       );
     }
   }
+
+  // @Cron('0 9 * * MON') // every Monday at 9 AM
+  // async sendWeeklyDigest() {
+  //   const subscribers = await this.subscriberModel.find({ confirmed: true });
+  //   const news = await this.newsModel.find().sort({ createdAt: -1 }).limit(3);
+
+  //   for (const sub of subscribers) {
+  //     await this.emailService.sendDigest(sub.email, news);
+  //   }
+  // }
 }
 
 // const newsletterTemplate = emailTemplatesProvider.sendNewsletterEmail({

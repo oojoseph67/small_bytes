@@ -61,7 +61,7 @@ export class EmailService {
   private async sendEmail({ html, subject, to }: SendEmail) {
     try {
       const { data, error } = await this.resend.emails.send({
-        from: `Auth Skeleton <${this.resendFromEmail}>`,
+        from: `Small Bytes <${this.resendFromEmail}>`,
         to: to,
         subject: subject,
         html: html,

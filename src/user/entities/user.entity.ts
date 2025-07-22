@@ -28,6 +28,11 @@ export class User extends Document {
   password: string;
 
   @Prop({
+    default: 0,
+  })
+  xp: number;
+
+  @Prop({
     type: Types.ObjectId,
     ref: Roles.name,
   })

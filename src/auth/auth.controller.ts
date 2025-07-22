@@ -3,12 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Logger,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
@@ -27,8 +25,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signup(@Body() signupDto: SignupDto) {
-    return this.authService.signup(signupDto);
+  async signup(@Body() signupDto: SignupDto, @Query('code') code: string) {
+    return this.authService.signup(signupDto, code);
   }
 
   @Post('login')
@@ -70,7 +68,7 @@ export class AuthController {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
 
-  @Post('/reset-password')
+  @Post('reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);
   }

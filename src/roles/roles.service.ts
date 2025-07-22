@@ -67,6 +67,51 @@ export class RolesService implements OnModuleInit {
                 Action.DELETE,
               ],
             },
+            {
+              resource: Resource.ACADEMY,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
+            {
+              resource: Resource.CERTIFICATE,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
+            {
+              resource: Resource.LESSON,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
+            {
+              resource: Resource.QUIZ,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
+            {
+              resource: Resource.COURSE,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
           ],
         },
         {
@@ -79,6 +124,22 @@ export class RolesService implements OnModuleInit {
             {
               resource: Resource.NEWSLETTER,
               actions: [Action.READ, Action.UPDATE],
+            },
+            {
+              resource: Resource.CERTIFICATE,
+              actions: [Action.READ],
+            },
+            {
+              resource: Resource.LESSON,
+              actions: [Action.READ],
+            },
+            {
+              resource: Resource.COURSE,
+              actions: [Action.READ],
+            },
+            {
+              resource: Resource.QUIZ,
+              actions: [Action.READ, Action.POST],
             },
           ],
         },

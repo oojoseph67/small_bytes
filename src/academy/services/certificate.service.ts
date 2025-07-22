@@ -110,4 +110,23 @@ export class CertificateService {
       );
     }
   }
+
+  async deleteCertificate(id: string): Promise<void> {
+    try {
+      const result = await this.certificateModel.findByIdAndDelete(id);
+
+      if (!result) {
+        throw new HttpException('Certificate not found', HttpStatus.NOT_FOUND);
+      }
+    } catch (error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Error deleting Certificate',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

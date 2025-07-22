@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Course } from '../entities/course.entity';
 import { CreateCourseDto, UpdateCourseDto } from '../dto/course.dto';
 import { CertificateService } from './certificate.service';
+import { LessonService } from './lesson.service';
 
 @Injectable()
 export class CourseService {
@@ -14,6 +15,8 @@ export class CourseService {
     private readonly courseModel: Model<Course>,
 
     private readonly certificateService: CertificateService,
+
+    private readonly lessonService: LessonService,
   ) {}
 
   async createCourse(createCourseDto: CreateCourseDto): Promise<Course> {
@@ -35,7 +38,10 @@ export class CourseService {
 
   async findCourseById(id: string): Promise<Course> {
     try {
-      const course = await this.courseModel.findById(id);
+      const course = await this.courseModel
+        .findById(id)
+        .populate('lessons')
+        .populate('certificate');
 
       //   if (!course) {
       //     throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
@@ -100,6 +106,15 @@ export class CourseService {
     lessonId: string;
   }): Promise<Course> {
     try {
+      const lesson = await this.lessonService.findLessonById(lessonId);
+
+      if (!lesson) {
+        throw new HttpException(
+          `Lesson with id: ${lessonId} was not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
       const updatedCourse = await this.courseModel.findByIdAndUpdate(
         courseId,
         { $addToSet: { lessons: lessonId } },
@@ -131,6 +146,15 @@ export class CourseService {
     lessonId: string;
   }): Promise<Course> {
     try {
+      const lesson = await this.lessonService.findLessonById(lessonId);
+
+      if (!lesson) {
+        throw new HttpException(
+          `Lesson with id: ${lessonId} was not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
       const updatedCourse = await this.courseModel.findByIdAndUpdate(
         courseId,
         { $pull: { lessons: lessonId } },

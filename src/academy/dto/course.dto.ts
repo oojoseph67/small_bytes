@@ -31,3 +31,23 @@ export class CreateCourseDto {
 }
 
 export class UpdateCourseDto extends PartialType(CreateCourseDto) {}
+
+export class SetCourseCertificateDto {
+  @IsMongoId()
+  @IsNotEmpty()
+  certificateId: string;
+
+  @IsMongoId()
+  @IsNotEmpty()
+  courseId: string;
+}
+
+export class SetLessonToCourseDto {
+  @IsMongoId()
+  @IsNotEmpty()
+  lessonId: string;
+
+  @IsMongoId()
+  @IsNotEmpty()
+  courseId: string;
+}

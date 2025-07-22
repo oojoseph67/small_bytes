@@ -11,11 +11,26 @@ export class LessonService {
     private readonly lessonModel: Model<Lesson>,
   ) {}
 
-  async createLesson(createLessonDto: CreateLessonDto) {
+  async createLesson(createLessonDto: CreateLessonDto): Promise<Lesson> {
     try {
       return await this.lessonModel.create({
         ...createLessonDto,
       });
+    } catch (error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Error creating lesson',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findLessonById(id: string): Promise<Lesson> {
+    try {
+      return await this.lessonModel.findById(id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;
@@ -34,7 +49,7 @@ export class LessonService {
   }: {
     lessonId: string;
     updateLessonDto: UpdateLessonDto;
-  }) {
+  }): Promise<Lesson> {
     try {
       const updatedLesson = await this.lessonModel.findByIdAndUpdate(
         lessonId,

@@ -8,6 +8,11 @@ import {
   UpdateCertificateDto,
 } from '../dto/certificate.dto';
 import { CreateCourseDto, UpdateCourseDto } from '../dto/course.dto';
+import {
+  CreateLessonDto,
+  QuizToLessonDto,
+  UpdateLessonDto,
+} from '../dto/lesson.dto';
 
 @Injectable()
 export class AcademyService {
@@ -127,5 +132,58 @@ export class AcademyService {
 
   async deleteCourse(id: string) {
     return await this.courseService.deleteCourse(id);
+  }
+
+  /**
+   * LESSON SERVICE
+   */
+
+  async createLesson(createLessonDto: CreateLessonDto) {
+    return await this.lessonService.createLesson(createLessonDto);
+  }
+
+  async getAllLessons() {
+    return await this.lessonService.findAllLesson();
+  }
+
+  async getLessonById(id: string) {
+    const lesson = await this.lessonService.findLessonById(id);
+
+    if (!lesson) {
+      throw new HttpException(`Lesson not found`, HttpStatus.NOT_FOUND);
+    }
+
+    return lesson;
+  }
+
+  async updateLesson({
+    id,
+    updateLessonDto,
+  }: {
+    id: string;
+    updateLessonDto: UpdateLessonDto;
+  }) {
+    return await this.lessonService.updateLesson({
+      lessonId: id,
+      updateLessonDto,
+    });
+  }
+
+  async addQuizToLesson(quizToLessonDto: QuizToLessonDto) {
+    return await this.lessonService.addQuizToLesson({
+      lessonId: quizToLessonDto.lessonId,
+      quizId: quizToLessonDto.quizId,
+    });
+  }
+
+  async removeQuizFromLesson(quizToLessonDto: QuizToLessonDto) {
+    return await this.lessonService.removeQuizFromLesson({
+      lessonId: quizToLessonDto.lessonId,
+      quizId: quizToLessonDto.quizId,
+    });
+  }
+
+  async deleteQuiz(id: string) {
+    return await this.lessonService.deleteLesson(id);
   }
 }

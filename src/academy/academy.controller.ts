@@ -18,6 +18,11 @@ import {
   SetLessonToCourseDto,
   UpdateCourseDto,
 } from './dto/course.dto';
+import {
+  CreateLessonDto,
+  QuizToLessonDto,
+  UpdateLessonDto,
+} from './dto/lesson.dto';
 
 @Controller('academy')
 export class AcademyController {
@@ -99,7 +104,7 @@ export class AcademyController {
     });
   }
 
-  @Post('remove-lesson-to-course')
+  @Post('remove-lesson-from-course')
   async removeLessonFromCourse(
     @Body() setLessonToCourseDto: SetLessonToCourseDto,
   ) {
@@ -113,4 +118,52 @@ export class AcademyController {
   async deleteCourse(@Param('id') id: string) {
     return this.academyService.deleteCourse(id);
   }
+
+  /**
+   * LESSON SERVICE
+   */
+  @Get('lesson')
+  async getAllLesson() {
+    return this.academyService.getAllLessons();
+  }
+
+  @Get('lesson/:id')
+  async getSingleLesson(@Param('id') id: string) {
+    return this.academyService.getLessonById(id);
+  }
+
+  @Post('lesson')
+  async createLesson(@Body() createLessonDto: CreateLessonDto) {
+    return this.academyService.createLesson(createLessonDto);
+  }
+
+  @Patch('lesson/:id')
+  async updateLesson(
+    @Body() updateLessonDto: UpdateLessonDto,
+    @Param('id') id: string,
+  ) {
+    return this.academyService.updateLesson({ id, updateLessonDto });
+  }
+
+  @Post('add-quiz-to-lesson')
+  async addQuizToLesson(@Body() quizToLessonDto: QuizToLessonDto) {
+    return this.academyService.addQuizToLesson(quizToLessonDto);
+  }
+
+  @Post('remove-quiz-from-lesson')
+  async removeQuizFromLesson(@Body() quizToLessonDto: QuizToLessonDto) {
+    return this.academyService.removeQuizFromLesson(quizToLessonDto);
+  }
+
+  @Delete('quiz/:id')
+  async deleteQuiz(@Param('id') id: string) {
+    return this.academyService.deleteQuiz(id);
+  }
 }
+
+/**
+ * FLOW: - create certificate, create course, create course lesson, create quiz and link everything together
+ *
+ * NB: each lesson has a single quiz
+ *
+ */

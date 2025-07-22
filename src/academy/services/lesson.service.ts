@@ -3,12 +3,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Lesson } from '../entities/lesson.entity';
 import { Model } from 'mongoose';
 import { CreateLessonDto, UpdateLessonDto } from '../dto/lesson.dto';
+import { QuizService } from './quiz.service';
 
 @Injectable()
 export class LessonService {
   constructor(
     @InjectModel(Lesson.name)
     private readonly lessonModel: Model<Lesson>,
+
+    private readonly quizService: QuizService,
   ) {}
 
   async createLesson(createLessonDto: CreateLessonDto): Promise<Lesson> {
@@ -28,6 +31,21 @@ export class LessonService {
     }
   }
 
+  async findAllLesson() {
+    try {
+      return await this.lessonModel.find().populate('quizId').exec();
+    } catch (error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Error finding lesson',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async findLessonById(id: string): Promise<Lesson> {
     try {
       return await this.lessonModel.findById(id);
@@ -37,7 +55,7 @@ export class LessonService {
       }
 
       throw new HttpException(
-        'Error creating lesson',
+        'Error finding lesson',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -68,7 +86,7 @@ export class LessonService {
       }
 
       throw new HttpException(
-        'Error creating lesson',
+        'Error finding lesson',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -82,14 +100,20 @@ export class LessonService {
     quizId: string;
   }): Promise<Lesson> {
     try {
+      const quiz = await this.quizService.findQuizById(quizId);
+
+      if (!quiz) {
+        throw new HttpException('Quiz not found', HttpStatus.NOT_FOUND);
+      }
+
       const updatedLesson = await this.lessonModel.findByIdAndUpdate(
         lessonId,
-        { $addToSet: { quiz: quizId } },
+        { $addToSet: { quizId: quizId } },
         { new: true, runValidators: true },
       );
 
       if (!updatedLesson) {
-        throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('Lesson not found', HttpStatus.NOT_FOUND);
       }
 
       return updatedLesson;
@@ -99,7 +123,7 @@ export class LessonService {
       }
 
       throw new HttpException(
-        'Error adding lesson to course',
+        'Error adding lesson to lesson',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -113,14 +137,20 @@ export class LessonService {
     quizId: string;
   }): Promise<Lesson> {
     try {
+      const quiz = await this.quizService.findQuizById(quizId);
+
+      if (!quiz) {
+        throw new HttpException('Quiz not found', HttpStatus.NOT_FOUND);
+      }
+
       const updatedLesson = await this.lessonModel.findByIdAndUpdate(
         lessonId,
-        { $pull: { quiz: quizId } },
+        { $pull: { quizId: quizId } },
         { new: true, runValidators: true },
       );
 
       if (!updatedLesson) {
-        throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('Lesson not found', HttpStatus.NOT_FOUND);
       }
 
       return updatedLesson;
@@ -130,7 +160,7 @@ export class LessonService {
       }
 
       throw new HttpException(
-        'Error removing lesson from course',
+        'Error removing lesson from lesson',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -141,7 +171,7 @@ export class LessonService {
       const result = await this.lessonModel.findByIdAndDelete(id);
 
       if (!result) {
-        throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('Lesson not found', HttpStatus.NOT_FOUND);
       }
     } catch (error: any) {
       if (error instanceof HttpException) {
@@ -149,7 +179,7 @@ export class LessonService {
       }
 
       throw new HttpException(
-        'Error deleting course',
+        'Error deleting lesson',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

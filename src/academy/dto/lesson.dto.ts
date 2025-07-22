@@ -28,3 +28,13 @@ export class CreateLessonDto {
 }
 
 export class UpdateLessonDto extends PartialType(CreateLessonDto) {}
+
+export class QuizToLessonDto {
+  @IsMongoId()
+  @IsNotEmpty()
+  lessonId: string;
+
+  @IsMongoId()
+  @IsNotEmpty()
+  quizId: string;
+}

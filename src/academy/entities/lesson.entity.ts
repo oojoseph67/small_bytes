@@ -20,7 +20,7 @@ export class Lesson extends Document {
     type: Types.ObjectId,
     ref: Quiz.name,
   })
-  quiz?: Quiz;
+  quizId?: Quiz;
 
   @Prop({
     type: Number,

@@ -40,7 +40,14 @@ export class CourseService {
     try {
       const course = await this.courseModel
         .findById(id)
-        .populate('lessons')
+        .populate({
+          path: 'lessons',
+          model: 'Lesson',
+          populate: {
+            path: 'quizId',
+            model: 'Quiz'
+          }
+        })
         .populate('certificate');
 
       //   if (!course) {
@@ -64,7 +71,14 @@ export class CourseService {
     try {
       return await this.courseModel
         .find()
-        .populate('lessons')
+        .populate({
+          path: 'lessons',
+          model: 'Lesson',
+          populate: {
+            path: 'quizId',
+            model: 'Quiz'
+          }
+        })
         .populate('certificate')
         .exec();
     } catch (error: any) {
@@ -125,7 +139,8 @@ export class CourseService {
         throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
       }
 
-      return updatedCourse;
+      // Return populated course
+      return await this.findCourseById(updatedCourse.id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;
@@ -165,7 +180,8 @@ export class CourseService {
         throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
       }
 
-      return updatedCourse;
+      // Return populated course
+      return await this.findCourseById(updatedCourse.id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;
@@ -203,7 +219,8 @@ export class CourseService {
         throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
       }
 
-      return updatedCourse;
+      // Return populated course
+      return await this.findCourseById(updatedCourse.id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;
@@ -234,7 +251,8 @@ export class CourseService {
         throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
       }
 
-      return updatedCourse;
+      // Return populated course
+      return await this.findCourseById(updatedCourse.id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;

@@ -14,6 +14,7 @@ import {
 } from './dto/certificate.dto';
 import {
   CreateCourseDto,
+  CreateCourseCompleteDto,
   SetCourseCertificateDto,
   SetLessonToCourseDto,
   UpdateCourseDto,
@@ -77,6 +78,11 @@ export class AcademyController {
   @Post('course')
   async createCourse(@Body() createCourseDto: CreateCourseDto) {
     return this.academyService.createCourse(createCourseDto);
+  }
+
+  @Post('course/complete')
+  async createCompleteCourse(@Body() createCourseCompleteDto: CreateCourseCompleteDto) {
+    return this.academyService.createCompleteCourse(createCourseCompleteDto);
   }
 
   @Patch('course/:id')

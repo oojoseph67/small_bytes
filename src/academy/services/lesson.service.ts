@@ -48,7 +48,7 @@ export class LessonService {
 
   async findLessonById(id: string): Promise<Lesson> {
     try {
-      return await this.lessonModel.findById(id);
+      return await this.lessonModel.findById(id).populate('quizId');
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;
@@ -79,7 +79,8 @@ export class LessonService {
         throw new HttpException('Lesson not found', HttpStatus.NOT_FOUND);
       }
 
-      return updatedLesson;
+      // Return populated lesson
+      return await this.findLessonById(updatedLesson.id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;
@@ -116,7 +117,8 @@ export class LessonService {
         throw new HttpException('Lesson not found', HttpStatus.NOT_FOUND);
       }
 
-      return updatedLesson;
+      // Return populated lesson
+      return await this.findLessonById(updatedLesson.id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;
@@ -153,7 +155,8 @@ export class LessonService {
         throw new HttpException('Lesson not found', HttpStatus.NOT_FOUND);
       }
 
-      return updatedLesson;
+      // Return populated lesson
+      return await this.findLessonById(updatedLesson.id);
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;

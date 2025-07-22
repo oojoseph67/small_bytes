@@ -7,7 +7,7 @@ import {
   CreateCertificateDto,
   UpdateCertificateDto,
 } from '../dto/certificate.dto';
-import { CreateCourseDto, UpdateCourseDto } from '../dto/course.dto';
+import { CreateCourseDto, UpdateCourseDto, CreateCourseCompleteDto } from '../dto/course.dto';
 import {
   CreateLessonDto,
   QuizToLessonDto,
@@ -69,6 +69,58 @@ export class AcademyService {
 
   async createCourse(createCourseDto: CreateCourseDto) {
     return await this.courseService.createCourse(createCourseDto);
+  }
+
+  async createCompleteCourse(createCourseCompleteDto: CreateCourseCompleteDto) {
+    // Create certificate first if provided
+    let certificateId: string | undefined;
+    if (createCourseCompleteDto.certificate) {
+      const certificate = await this.certificateService.createCertificate(
+        createCourseCompleteDto.certificate
+      );
+      certificateId = certificate.id;
+    }
+
+    // Create course with certificate
+    const courseData = {
+      title: createCourseCompleteDto.title,
+      description: createCourseCompleteDto.description,
+      category: createCourseCompleteDto.category,
+      certificate: certificateId,
+    };
+    const course = await this.courseService.createCourse(courseData);
+
+    // Create lessons and quizzes
+    const lessonIds: string[] = [];
+    for (const lessonData of createCourseCompleteDto.lessons) {
+      // Create quiz first if provided
+      let quizId: string | undefined;
+      if (lessonData.quiz) {
+        const quiz = await this.quizService.createQuiz(lessonData.quiz);
+        quizId = quiz.id;
+      }
+
+      // Create lesson with quiz
+      const lesson = await this.lessonService.createLesson({
+        title: lessonData.title,
+        content: lessonData.content,
+        xpReward: lessonData.xpReward,
+        quiz: quizId,
+      });
+
+      lessonIds.push(lesson.id);
+    }
+
+    // Add all lessons to the course
+    for (const lessonId of lessonIds) {
+      await this.courseService.addLessonToCourse({
+        courseId: course.id,
+        lessonId,
+      });
+    }
+
+    // Return the complete course with all relationships
+    return await this.courseService.findCourseById(course.id);
   }
 
   async getAllCourse() {

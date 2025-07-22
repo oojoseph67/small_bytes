@@ -6,10 +6,20 @@ import { Lesson, LessonSchema } from './entities/lesson.entity';
 import { Certificate, CertificateSchema } from './entities/certificate.entity';
 import { Quiz, QuizSchema } from './entities/quiz.entity';
 import { Course, CourseSchema } from './entities/course.entity';
+import { LessonService } from './services/lesson.service';
+import { QuizService } from './services/quiz.service';
+import { CertificateService } from './services/certificate.service';
+import { CourseService } from './services/course.service';
 
 @Module({
   controllers: [AcademyController],
-  providers: [AcademyService],
+  providers: [
+    AcademyService,
+    LessonService,
+    QuizService,
+    CertificateService,
+    CourseService,
+  ],
   imports: [
     MongooseModule.forFeature([
       {

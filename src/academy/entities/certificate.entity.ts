@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Types } from 'mongoose';
+import { Course } from './course.entity';
 
 @Schema({ timestamps: true, collection: 'certificate' })
 export class Certificate extends Document {
@@ -14,12 +15,6 @@ export class Certificate extends Document {
     required: true,
   })
   description: string;
-
-  @Prop({
-    type: String,
-    required: true,
-  })
-  courseId: string;
 
   @Prop({
     type: String,

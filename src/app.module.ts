@@ -13,6 +13,7 @@ import { RolesModule } from './roles/roles.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { NewsletterModule } from './newsletter/newsletter.module';
+import { AcademyModule } from './academy/academy.module';
 
 @Module({
   imports: [
@@ -44,6 +45,8 @@ import { NewsletterModule } from './newsletter/newsletter.module';
     RolesModule,
 
     NewsletterModule,
+
+    AcademyModule,
   ],
   controllers: [AppController],
   providers: [

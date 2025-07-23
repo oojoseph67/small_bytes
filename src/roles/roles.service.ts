@@ -112,6 +112,15 @@ export class RolesService implements OnModuleInit {
                 Action.DELETE,
               ],
             },
+            {
+              resource: Resource.XP,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
           ],
         },
         {
@@ -140,6 +149,10 @@ export class RolesService implements OnModuleInit {
             {
               resource: Resource.QUIZ,
               actions: [Action.READ, Action.POST],
+            },
+            {
+              resource: Resource.XP,
+              actions: [Action.READ],
             },
           ],
         },

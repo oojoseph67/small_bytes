@@ -8,6 +8,7 @@ export enum Resource {
   LESSON = 'lesson',
   QUIZ = 'quiz',
   COURSE = 'course',
+  XP = 'xp'
 }
 
 // sections in the application

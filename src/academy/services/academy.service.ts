@@ -105,7 +105,7 @@ export class AcademyService {
         title: lessonData.title,
         content: lessonData.content,
         xpReward: lessonData.xpReward,
-        quiz: quizId,
+        quizId: quizId,
       });
 
       lessonIds.push(lesson.id);

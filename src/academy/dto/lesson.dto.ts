@@ -19,7 +19,7 @@ export class CreateLessonDto {
 
   @IsOptional()
   @IsMongoId()
-  quiz?: string;
+  quizId?: string;
 
   @IsOptional()
   @IsNumber()

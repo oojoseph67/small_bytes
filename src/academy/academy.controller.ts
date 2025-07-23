@@ -40,6 +40,7 @@ import { AuthorizationGuard } from 'src/auth/guards/authorization.guard';
 import { Permissions } from 'src/roles/decorator/permissions.decorator';
 import { Resource } from 'src/roles/enums/resource.enum';
 import { Action } from 'src/roles/enums/action.enum';
+import { AccessTokenPayload } from 'src/auth/type/auth.type';
 
 @UseGuards(AuthenticationGuard, AuthorizationGuard)
 @Controller('academy')
@@ -219,17 +220,17 @@ export class AcademyController {
   @Post('quiz/submit')
   @Permissions([{ resource: Resource.QUIZ, actions: [Action.POST] }])
   async submitQuiz(@Request() req, @Body() submitQuizDto: SubmitQuizDto) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.quizAttemptService.submitQuiz(userId, submitQuizDto);
   }
 
-  @Get('quiz/attempts')
+  @Get('quiz/user/attempts')
   @Permissions([{ resource: Resource.QUIZ, actions: [Action.READ] }])
   async getUserQuizAttempts(
     @Request() req,
     @Query() query: GetQuizAttemptsDto,
   ) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.quizAttemptService.getUserQuizAttempts(
       userId,
       query.courseId,
@@ -249,7 +250,7 @@ export class AcademyController {
   @Permissions([{ resource: Resource.COURSE, actions: [Action.READ] }])
   @Get('progress')
   async getUserProgress(@Request() req, @Query() query: GetUserProgressDto) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.userProgressService.getUserProgress(userId, query);
   }
 
@@ -263,14 +264,14 @@ export class AcademyController {
   @Get('progress/courses')
   @Permissions([{ resource: Resource.COURSE, actions: [Action.READ] }])
   async getAllCoursesProgress(@Request() req) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.userProgressService.getAllCoursesProgress(userId);
   }
 
   @Get('progress/stats')
   @Permissions([{ resource: Resource.COURSE, actions: [Action.READ] }])
   async getUserStats(@Request() req) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.userProgressService.getUserStats(userId);
   }
 
@@ -281,7 +282,7 @@ export class AcademyController {
   @Get('xp/history')
   @Permissions([{ resource: Resource.COURSE, actions: [Action.READ] }])
   async getXPHistory(@Request() req, @Query() query: GetXPHistoryDto) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.xpHistoryService.getUserXPHistory(
       userId,
       query.limit,
@@ -292,7 +293,7 @@ export class AcademyController {
   @Get('xp/stats')
   @Permissions([{ resource: Resource.XP, actions: [Action.READ] }])
   async getXPStats(@Request() req) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.xpHistoryService.getUserXPStats(userId);
   }
 
@@ -305,14 +306,14 @@ export class AcademyController {
   @Get('xp/activity-stats')
   @Permissions([{ resource: Resource.XP, actions: [Action.READ] }])
   async getActivityTypeStats(@Request() req) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.xpHistoryService.getActivityTypeStats(userId);
   }
 
   @Get('xp/recent-activity')
   @Permissions([{ resource: Resource.XP, actions: [Action.READ] }])
   async getRecentActivity(@Request() req, @Query('limit') limit?: number) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.xpHistoryService.getRecentActivity(userId, limit);
   }
 
@@ -323,7 +324,7 @@ export class AcademyController {
   @Get('certificates/earned')
   @Permissions([{ resource: Resource.CERTIFICATE, actions: [Action.READ] }])
   async getUserCertificates(@Request() req) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.userCertificateService.getUserCertificates(userId);
   }
 
@@ -350,7 +351,7 @@ export class AcademyController {
   @Get('certificates/stats')
   @Permissions([{ resource: Resource.CERTIFICATE, actions: [Action.READ] }])
   async getCertificateStats(@Request() req) {
-    const userId = req.user.id;
+    const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.userCertificateService.getCertificateStats(userId);
   }
 

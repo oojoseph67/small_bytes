@@ -53,83 +53,93 @@ export class QuizAttemptService {
       throw new HttpException(`Quiz not found`, HttpStatus.NOT_FOUND);
     }
 
-    console.log({quiz})
-
     // Validate user exists
     const user = await this.userModel.findById(userId);
-
-    console.log({user})
     if (!user) {
       throw new HttpException(`User not found`, HttpStatus.NOT_FOUND);
     }
 
-    // if (!Array.isArray(answers) || answers.length !== quiz.questions.length) {
-    //   throw new HttpException(
-    //     `Invalid answers format. Expected an array of ${quiz.questions.length} answers.`,
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
+    if (!Array.isArray(answers) || answers.length !== quiz.questions.length) {
+      throw new HttpException(
+        `Invalid answers format. Expected an array of ${quiz.questions.length} answers but got ${answers.length}.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-    // // Calculate score
-    // const { score, correctAnswers, totalQuestions, passed } =
-    //   this.calculateQuizScore(quiz, answers);
+    const quizTaken = await this.quizAttemptModel.findOne({
+      userId: new Types.ObjectId(userId),
+      quizId: new Types.ObjectId(quizId),
+      lessonId: new Types.ObjectId(lessonId),
+      courseId: new Types.ObjectId(courseId),
+    });
 
-    // // Calculate XP based on performance
-    // const xpEarned = this.calculateQuizXP(score, totalQuestions, passed);
+    if (quizTaken) {
+      throw new HttpException(
+        `You have taken this quiz`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-    // // Create quiz attempt
-    // const quizAttempt = new this.quizAttemptModel({
-    //   userId: new Types.ObjectId(userId),
-    //   quizId: new Types.ObjectId(quizId),
-    //   lessonId: new Types.ObjectId(lessonId),
-    //   courseId: new Types.ObjectId(courseId),
-    //   answers: answers.map((answer, index) => ({
-    //     questionIndex: answer.questionIndex,
-    //     selectedAnswer: answer.selectedAnswer,
-    //     isCorrect:
-    //       answer.selectedAnswer ===
-    //       quiz.questions[answer.questionIndex].correctIndex,
-    //   })),
-    //   score,
-    //   totalQuestions,
-    //   correctAnswers,
-    //   passed,
-    //   xpEarned,
-    // });
+    // Calculate score
+    const { score, correctAnswers, totalQuestions, passed } =
+      this.calculateQuizScore(quiz, answers);
 
-    // await quizAttempt.save();
+    // Calculate XP based on performance
+    const xpEarned = this.calculateQuizXP(score, totalQuestions, passed);
 
-    // // Update user progress
-    // await this.updateUserProgress(
-    //   userId,
-    //   lessonId,
-    //   courseId,
-    //   score,
-    //   xpEarned,
-    //   passed,
-    // );
+    // Create quiz attempt
+    const quizAttempt = new this.quizAttemptModel({
+      userId: new Types.ObjectId(userId),
+      quizId: new Types.ObjectId(quizId),
+      lessonId: new Types.ObjectId(lessonId),
+      courseId: new Types.ObjectId(courseId),
+      answers: answers.map((answer, index) => ({
+        questionIndex: answer.questionIndex,
+        selectedAnswer: answer.selectedAnswer,
+        isCorrect:
+          answer.selectedAnswer ===
+          quiz.questions[answer.questionIndex].correctIndex,
+      })),
+      score,
+      totalQuestions,
+      correctAnswers,
+      passed,
+      xpEarned,
+    });
 
-    // // Update user XP
-    // await this.updateUserXP(
-    //   userId,
-    //   xpEarned,
-    //   XPActivityType.QUIZ_COMPLETION,
-    //   `Quiz completed with ${score}% score`,
-    //   quizId,
-    //   'quiz',
-    // );
+    await quizAttempt.save();
 
-    // return {
-    //   id: quizAttempt._id.toString(),
-    //   score,
-    //   totalQuestions,
-    //   correctAnswers,
-    //   xpEarned,
-    //   passed: passed,
-    //   message: passed
-    //     ? `Congratulations! You passed with ${score}% and earned ${xpEarned} XP!`
-    //     : `You scored ${score}%. You need 70% to pass. Keep trying!`,
-    // };
+    // Update user progress
+    await this.updateUserProgress(
+      userId,
+      lessonId,
+      courseId,
+      score,
+      xpEarned,
+      passed,
+    );
+
+    // Update user XP
+    await this.updateUserXP(
+      userId,
+      xpEarned,
+      XPActivityType.QUIZ_COMPLETION,
+      `Quiz completed with ${score}% score`,
+      quizId,
+      'quiz',
+    );
+
+    return {
+      id: quizAttempt._id.toString(),
+      score,
+      totalQuestions,
+      correctAnswers,
+      xpEarned,
+      passed: passed,
+      message: passed
+        ? `Congratulations! You passed with ${score}% and earned ${xpEarned} XP!`
+        : `You scored ${score}%. You need 70% to pass. Keep trying!`,
+    };
   }
 
   private calculateQuizScore(quiz: QuizDocument, answers: any[]) {
@@ -264,6 +274,8 @@ export class QuizAttemptService {
     if (lessonId) {
       filter.lessonId = new Types.ObjectId(lessonId);
     }
+
+    console.log({ filter, courseId, lessonId });
 
     return this.quizAttemptModel
       .find(filter)

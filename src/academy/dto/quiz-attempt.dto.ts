@@ -62,10 +62,6 @@ export class QuizAttemptResponseDto {
 export class GetQuizAttemptsDto {
   @IsMongoId()
   @IsOptional()
-  userId?: string;
-
-  @IsMongoId()
-  @IsOptional()
   courseId?: string;
 
   @IsMongoId()

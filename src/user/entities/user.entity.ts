@@ -3,7 +3,7 @@ import { Exclude } from 'class-transformer';
 import { Document, HydratedDocument, Types } from 'mongoose';
 import { Roles } from 'src/roles/entities/role.entity';
 
-@Schema()
+@Schema({ timestamps: true })
 export class User extends Document {
   @Prop({
     required: true,

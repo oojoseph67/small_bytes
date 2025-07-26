@@ -14,6 +14,7 @@ import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { AcademyModule } from './academy/academy.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -47,6 +48,8 @@ import { AcademyModule } from './academy/academy.module';
     NewsletterModule,
 
     AcademyModule,
+
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [

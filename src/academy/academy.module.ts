@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AcademyService } from './services/academy.service';
 import { AcademyController } from './academy.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -41,7 +41,7 @@ import { UserCertificateService } from './services/user-certificate.service';
     UserCertificateService,
   ],
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     MongooseModule.forFeature([
       {
         name: Lesson.name,
@@ -81,5 +81,6 @@ import { UserCertificateService } from './services/user-certificate.service';
       },
     ]),
   ],
+  exports: [XPHistoryService],
 })
 export class AcademyModule {}

@@ -6,6 +6,7 @@ import { User, UserSchema } from './entities/user.entity';
 import { RolesModule } from 'src/roles/roles.module';
 import { NewsletterModule } from 'src/newsletter/newsletter.module';
 import { EmailModule } from 'src/email/email.module';
+import { AcademyModule } from 'src/academy/academy.module';
 
 @Module({
   controllers: [UserController],
@@ -23,6 +24,8 @@ import { EmailModule } from 'src/email/email.module';
     forwardRef(() => NewsletterModule),
 
     EmailModule,
+
+    forwardRef(() => AcademyModule),
   ],
   exports: [UserService],
 })

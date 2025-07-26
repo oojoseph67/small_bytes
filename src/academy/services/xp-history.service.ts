@@ -203,4 +203,63 @@ export class XPHistoryService {
       createdAt: h.createdAt.toISOString(),
     }));
   }
+
+  async addSignupXP(userId: string): Promise<void> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const signupXP = 10;
+    const previousXP = user.xp;
+    const newXP = previousXP + signupXP;
+
+    // Create XP history record
+    await this.xpHistoryModel.create({
+      userId: new Types.ObjectId(userId),
+      xpChange: signupXP,
+      previousXP: previousXP,
+      newXP: newXP,
+      activityType: XPActivityType.BONUS,
+      description: 'Welcome bonus for joining Small Bytes',
+      relatedEntityType: 'signup',
+    });
+
+    // Update user's XP
+    user.xp = newXP;
+    await user.save();
+  }
+
+  async addXP(
+    userId: string,
+    xpChange: number,
+    activityType: XPActivityType,
+    description: string,
+    relatedEntityId?: string,
+    relatedEntityType?: string,
+  ): Promise<void> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const previousXP = user.xp;
+    const newXP = previousXP + xpChange;
+
+    // Create XP history record
+    await this.xpHistoryModel.create({
+      userId: new Types.ObjectId(userId),
+      xpChange: xpChange,
+      previousXP: previousXP,
+      newXP: newXP,
+      activityType: activityType,
+      description: description,
+      relatedEntityId: relatedEntityId ? new Types.ObjectId(relatedEntityId) : undefined,
+      relatedEntityType: relatedEntityType,
+    });
+
+    // Update user's XP
+    user.xp = newXP;
+    await user.save();
+  }
 }

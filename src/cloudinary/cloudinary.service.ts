@@ -1,17 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryResponse } from './types/cloudinary-response';
+import { MulterFile } from './types';
+
 const streamifier = require('streamifier');
 
 @Injectable()
 export class CloudinaryService {
+  private readonly logger = new Logger(CloudinaryService.name);
+
   uploadFile({
     file,
-    folder = 'collections',
+    folder = 'small-bytes',
   }: {
-    file: any;
+    file: MulterFile;
     folder?: string;
   }): Promise<CloudinaryResponse> {
+    this.logger.debug(`uploading image to folder: ${folder}`);
+
     return new Promise<CloudinaryResponse>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -20,7 +26,11 @@ export class CloudinaryService {
           use_filename: true,
         },
         (error, result) => {
-          if (error) return reject(error);
+          if (error) {
+            this.logger.error('error uploading image');
+            return reject(error);
+          }
+
           resolve(result);
         },
       );

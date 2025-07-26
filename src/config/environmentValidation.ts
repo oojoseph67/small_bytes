@@ -22,5 +22,5 @@ export default Joi.object({
   CLOUDINARY_API_KEY: Joi.string().required(),
   CLOUDINARY_API_SECRET: Joi.string().required(),
   CLOUDINARY_URL: Joi.string().required(),
-  THIRDWEB_SECRET_KEY: Joi.string().required(),
+  // THIRDWEB_SECRET_KEY: Joi.string().required(),
 });

@@ -58,7 +58,7 @@ export class BlogPost extends Document {
     type: Types.ObjectId,
     ref: BlogMedia.name,
   })
-  featuredImage: Types.ObjectId;
+  featuredImage: BlogMedia;
 
   @Prop()
   publishedAt: Date;

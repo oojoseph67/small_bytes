@@ -12,6 +12,9 @@ import {
   News,
   NewsSchema,
 } from './entities';
+import { BlogMediaService } from './services/blog-media.service';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -33,8 +36,11 @@ import {
         schema: NewsSchema,
       },
     ]),
+
+    CloudinaryModule,
+    UserModule,
   ],
   controllers: [BlogController],
-  providers: [BlogService],
+  providers: [BlogService, BlogMediaService],
 })
 export class BlogModule {}

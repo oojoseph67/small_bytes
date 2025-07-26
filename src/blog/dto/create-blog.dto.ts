@@ -10,6 +10,7 @@ import {
   Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateBlogDto {
   @ApiProperty({
@@ -51,14 +52,32 @@ export class CreateBlogDto {
   author?: string;
 
   @ApiPropertyOptional({
-    description: 'Categories for the blog post (max 5)',
-    type: [String],
-    example: ['Programming', 'NestJS', 'Backend'],
+    description:
+      'Categories for the blog post (max 5). Send as comma-separated string or JSON array string',
+    example: 'Programming,NestJS,Backend',
   })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  categories?: string[];
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      // Handle comma-separated string
+      if (value.includes(',')) {
+        return value
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
+      }
+      // Handle JSON array string
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        // If not JSON, treat as single item array
+        return value ? [value] : [];
+      }
+    }
+    return value;
+  })
+  categories: string[];
 
   @ApiPropertyOptional({
     description: 'Whether the blog post is published',
@@ -70,28 +89,46 @@ export class CreateBlogDto {
   isPublished?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Tags for the blog post',
-    type: [String],
-    example: ['nestjs', 'typescript', 'backend'],
+    description:
+      'Tags for the blog post. Send as comma-separated string or JSON array string',
+    example: 'nestjs,typescript,backend',
   })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      // Handle comma-separated string
+      if (value.includes(',')) {
+        return value
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
+      }
+      // Handle JSON array string
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        // If not JSON, treat as single item array
+        return value ? [value] : [];
+      }
+    }
+    return value;
+  })
+  tags: string[];
 
-  @ApiPropertyOptional({
-    description: 'Featured image ID',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @IsOptional()
-  @IsMongoId()
-  featuredImage?: string;
+  // @ApiPropertyOptional({
+  //   description: 'Featured image ID',
+  //   example: '507f1f77bcf86cd799439011',
+  // })
+  // @IsOptional()
+  // @IsMongoId()
+  // featuredImage?: string;
 
-  @ApiPropertyOptional({
-    description: 'Publication date',
-    example: '2024-01-15T10:30:00.000Z',
-  })
-  @IsOptional()
-  @IsDateString()
-  publishedAt?: string;
+  // @ApiPropertyOptional({
+  //   description: 'Publication date',
+  //   example: '2024-01-15T10:30:00.000Z',
+  // })
+  // @IsOptional()
+  // @IsDateString()
+  // publishedAt?: string;
 }

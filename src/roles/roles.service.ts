@@ -121,6 +121,15 @@ export class RolesService implements OnModuleInit {
                 Action.DELETE,
               ],
             },
+            {
+              resource: Resource.BLOG,
+              actions: [
+                Action.READ,
+                Action.CREATE,
+                Action.UPDATE,
+                Action.DELETE,
+              ],
+            },
           ],
         },
         {

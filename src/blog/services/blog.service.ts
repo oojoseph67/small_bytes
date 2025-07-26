@@ -1,25 +1,275 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateBlogDto, UpdateBlogDto } from '../dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { BlogPost, BlogPostDocument } from '../entities';
+import { Model, Types } from 'mongoose';
+import { BlogMediaService } from './blog-media.service';
+import { MulterFile } from 'src/cloudinary/types';
 
 @Injectable()
 export class BlogService {
-  create(createBlogDto: CreateBlogDto) {
-    return 'This action adds a new blog';
+  private readonly logger = new Logger(BlogService.name);
+
+  constructor(
+    @InjectModel(BlogPost.name)
+    private readonly blogPostModel: Model<BlogPostDocument>,
+
+    private readonly blogMediaService: BlogMediaService,
+  ) {}
+
+  async create({
+    createBlogDto,
+    files,
+  }: {
+    createBlogDto: CreateBlogDto;
+    files: {
+      blogImage: MulterFile;
+    };
+  }): Promise<BlogPostDocument> {
+    this.logger.debug('creating blog post');
+
+    try {
+      const { categories, tags } = createBlogDto;
+
+      if (!files) {
+        throw new HttpException(
+          `Please upload an image`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      if (!categories || !tags) {
+        throw new HttpException(
+          'Provide both categories and tags field',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      if (!Array.isArray(tags) || !Array.isArray(categories)) {
+        throw new HttpException(
+          'Tags and Categories are not array',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const blogMedia = await this.blogMediaService.uploadBlogMedia(
+        files.blogImage,
+      );
+
+      if (!blogMedia) {
+        throw new HttpException(
+          `Failed to upload image`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const blogPost = await this.blogPostModel.create({
+        ...createBlogDto,
+        featuredImage: new Types.ObjectId(blogMedia._id.toString()),
+      });
+
+      this.logger.log('blog post created');
+
+      return await this.getSingleBlogPost(blogPost.id);
+    } catch (error: any) {
+      this.logger.error('error creating blog post', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error creating blog: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  findAll() {
-    return `This action returns all blog`;
+  async publishBlogPost(blogPostId: string): Promise<BlogPostDocument> {
+    this.logger.debug('publishing blog post');
+    try {
+      const blogPost = await this.getSingleBlogPost(blogPostId);
+
+      if (!blogPost) {
+        throw new HttpException(
+          `Blogpost doesn't exist`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      blogPost.isPublished = true;
+
+      await blogPost.save();
+
+      return blogPost;
+    } catch (error: any) {
+      this.logger.error('error publishing blog post', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error publishing blog post: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} blog`;
+  async getSingleBlogPost(blogPostId: string): Promise<BlogPostDocument> {
+    this.logger.debug('getting single blog post');
+
+    try {
+      return await this.blogPostModel
+        .findById(blogPostId)
+        .populate('featuredImage');
+    } catch (error: any) {
+      this.logger.error('error fetching single blog post', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error fetching single blog post: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  update(id: number, updateBlogDto: UpdateBlogDto) {
-    return `This action updates a #${id} blog`;
+  async getAllPublishedBlogPost(): Promise<BlogPostDocument[]> {
+    this.logger.debug('getting all published blog post');
+
+    try {
+      return await this.blogPostModel
+        .find({ isPublished: true })
+        .populate('featuredImage');
+    } catch (error: any) {
+      this.logger.error('error fetching published blog posts', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error fetching published blog posts: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} blog`;
+  async getAllUnPublishedBlogPost(): Promise<BlogPostDocument[]> {
+    this.logger.debug('getting all unpublished blog post');
+
+    try {
+      return await this.blogPostModel
+        .find({ isPublished: false })
+        .populate('featuredImage');
+    } catch (error: any) {
+      this.logger.error('error fetching unpublished blog posts', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error fetching unpublished blog posts: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async update({
+    blogPostId,
+    updateBlogDto,
+    files,
+  }: {
+    blogPostId: string;
+    updateBlogDto: UpdateBlogDto;
+    files?: {
+      blogImage?: MulterFile;
+    };
+  }): Promise<BlogPostDocument> {
+    this.logger.debug('updating blog post');
+
+    try {
+      const blogPost = await this.getSingleBlogPost(blogPostId);
+
+      if (!blogPost) {
+        throw new HttpException(`Blog post not found`, HttpStatus.NOT_FOUND);
+      }
+
+      const updateData: any = { ...updateBlogDto };
+
+      if (files?.blogImage) {
+        const blogMedia = await this.blogMediaService.uploadBlogMedia(
+          files.blogImage,
+        );
+
+        if (!blogMedia) {
+          throw new HttpException(
+            `Failed to upload image`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        updateData.featuredImage = new Types.ObjectId(blogMedia._id.toString());
+      }
+
+      // Update the blog post
+      const updatedBlogPost = await this.blogPostModel
+        .findByIdAndUpdate(blogPostId, updateData, {
+          new: true,
+          runValidators: true,
+        })
+        .populate('featuredImage');
+
+      if (!updatedBlogPost) {
+        throw new HttpException(
+          `Failed to update blog post`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      this.logger.log('blog post updated successfully');
+
+      return updatedBlogPost;
+    } catch (error: any) {
+      this.logger.error('error updating blog post', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error updating blog post: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async delete(blogPostId: string) {
+    this.logger.debug('deleting blog post');
+
+    try {
+      const blogPost = await this.blogPostModel.findByIdAndDelete(blogPostId);
+
+      if (!blogPost) {
+        throw new HttpException(`Blog post not found`, HttpStatus.NOT_FOUND);
+      }
+
+      return 'Blog post deleted successfully';
+    } catch (error: any) {
+      this.logger.error('error deleting blog post', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Error deleting blog post: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

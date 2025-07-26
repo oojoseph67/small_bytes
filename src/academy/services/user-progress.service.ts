@@ -62,17 +62,7 @@ export class UserProgressService {
       .populate('lessonId', 'title description')
       .sort({ updatedAt: -1 });
 
-    return progress.map((p) => ({
-      id: p._id.toString(),
-      userId: p.userId.toString(),
-      courseId: p.courseId.toString(),
-      lessonId: p.lessonId.toString(),
-      isCompleted: p.isCompleted,
-      score: p.score,
-      xpEarned: p.xpEarned,
-      attempts: p.attempts,
-      completedAt: p.completedAt?.toISOString(),
-    }));
+    return progress;
   }
 
   async getCourseProgress(
@@ -116,6 +106,7 @@ export class UserProgressService {
 
     return {
       courseId,
+      course,
       totalLessons,
       completedLessons,
       totalXP,

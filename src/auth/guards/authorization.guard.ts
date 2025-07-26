@@ -40,7 +40,6 @@ export class AuthorizationGuard implements CanActivate {
         context.getClass(),
       ]);
 
-
     if (!routePermissions || routePermissions.length === 0) {
       this.logger.debug(
         `No permissions required for route: ${context.getHandler().name}`,
@@ -48,10 +47,10 @@ export class AuthorizationGuard implements CanActivate {
       return true;
     }
 
-    this.logger.debug(`Checking permissions for user ${user.userId}:`, {
-      route: `${context.getClass().name}.${context.getHandler().name}`,
-      requiredPermissions: routePermissions,
-    });
+    // this.logger.debug(`Checking permissions for user ${user.userId}:`, {
+    //   route: `${context.getClass().name}.${context.getHandler().name}`,
+    //   requiredPermissions: routePermissions,
+    // });
 
     try {
       const userRoleData = await this.userService.getUserPermissions(

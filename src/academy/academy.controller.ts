@@ -57,21 +57,25 @@ export class AcademyController {
    * CERTIFICATE SERVICE
    */
   @Get('certificate')
+  @Permissions([{ resource: Resource.ADMIN, actions: [Action.READ] }])
   async allCertificate() {
     return this.academyService.getAllCertificate();
   }
 
   @Get('certificate/:id')
+  @Permissions([{ resource: Resource.ADMIN, actions: [Action.READ] }])
   async singleCertificate(@Param('id') id: string) {
     return this.academyService.getCertificateById(id);
   }
 
   @Post('create-certificate')
+  @Permissions([{ resource: Resource.ADMIN, actions: [Action.CREATE] }])
   async createCertificate(@Body() createCertificateDto: CreateCertificateDto) {
     return this.academyService.createCertificate(createCertificateDto);
   }
 
   @Patch('update-certificate/:id')
+  @Permissions([{ resource: Resource.ADMIN, actions: [Action.UPDATE] }])
   async updateCertificate(
     @Body() updateCertificateDto: UpdateCertificateDto,
     @Param('id') id: string,
@@ -80,6 +84,7 @@ export class AcademyController {
   }
 
   @Delete('certificate/:id')
+  @Permissions([{ resource: Resource.ADMIN, actions: [Action.DELETE] }])
   async deleteCertificate(@Param('id') id: string) {
     console.log('id');
     return this.academyService.deleteCertificate(id);
@@ -89,21 +94,25 @@ export class AcademyController {
    * COURSE SERVICE
    */
   @Get('course')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.READ] }])
   async allCourse() {
     return this.academyService.getAllCourse();
   }
 
   @Get('course/:id')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.READ] }])
   async singleCourse(@Param('id') id: string) {
     return this.academyService.getCourseById(id);
   }
 
   @Post('course')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.CREATE] }])
   async createCourse(@Body() createCourseDto: CreateCourseDto) {
     return this.academyService.createCourse(createCourseDto);
   }
 
   @Post('course/complete')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.CREATE] }])
   async createCompleteCourse(
     @Body() createCourseCompleteDto: CreateCourseCompleteDto,
   ) {
@@ -111,6 +120,7 @@ export class AcademyController {
   }
 
   @Patch('course/:id')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.UPDATE] }])
   async updateCourse(
     @Body() updateCourseDto: UpdateCourseDto,
     @Param('id') id: string,
@@ -119,6 +129,7 @@ export class AcademyController {
   }
 
   @Post('set-course-certificate')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.UPDATE] }])
   async setCourseCertificate(
     @Body() setCourseCertificateDto: SetCourseCertificateDto,
   ) {
@@ -129,6 +140,7 @@ export class AcademyController {
   }
 
   @Post('add-lesson-to-course')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.UPDATE] }])
   async addLessonToCourse(@Body() setLessonToCourseDto: SetLessonToCourseDto) {
     return this.academyService.addLessonToCourse({
       lessonId: setLessonToCourseDto.lessonId,
@@ -137,6 +149,7 @@ export class AcademyController {
   }
 
   @Post('remove-lesson-from-course')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.UPDATE] }])
   async removeLessonFromCourse(
     @Body() setLessonToCourseDto: SetLessonToCourseDto,
   ) {
@@ -147,6 +160,7 @@ export class AcademyController {
   }
 
   @Delete('course/:id')
+  @Permissions([{ resource: Resource.COURSE, actions: [Action.DELETE] }])
   async deleteCourse(@Param('id') id: string) {
     return this.academyService.deleteCourse(id);
   }
@@ -155,21 +169,25 @@ export class AcademyController {
    * LESSON SERVICE
    */
   @Get('lesson')
+  @Permissions([{ resource: Resource.LESSON, actions: [Action.READ] }])
   async getAllLesson() {
     return this.academyService.getAllLessons();
   }
 
   @Get('lesson/:id')
+  @Permissions([{ resource: Resource.LESSON, actions: [Action.READ] }])
   async getSingleLesson(@Param('id') id: string) {
     return this.academyService.getLessonById(id);
   }
 
   @Post('lesson')
+  @Permissions([{ resource: Resource.LESSON, actions: [Action.CREATE] }])
   async createLesson(@Body() createLessonDto: CreateLessonDto) {
     return this.academyService.createLesson(createLessonDto);
   }
 
   @Patch('lesson/:id')
+  @Permissions([{ resource: Resource.LESSON, actions: [Action.UPDATE] }])
   async updateLesson(
     @Body() updateLessonDto: UpdateLessonDto,
     @Param('id') id: string,
@@ -178,16 +196,19 @@ export class AcademyController {
   }
 
   @Post('add-quiz-to-lesson')
+  @Permissions([{ resource: Resource.LESSON, actions: [Action.UPDATE] }])
   async addQuizToLesson(@Body() quizToLessonDto: QuizToLessonDto) {
     return this.academyService.addQuizToLesson(quizToLessonDto);
   }
 
   @Post('remove-quiz-from-lesson')
+  @Permissions([{ resource: Resource.LESSON, actions: [Action.UPDATE] }])
   async removeQuizFromLesson(@Body() quizToLessonDto: QuizToLessonDto) {
     return this.academyService.removeQuizFromLesson(quizToLessonDto);
   }
 
   @Delete('quiz/:id')
+  @Permissions([{ resource: Resource.LESSON, actions: [Action.DELETE] }])
   async deleteQuiz(@Param('id') id: string) {
     return this.academyService.deleteQuiz(id);
   }
@@ -196,16 +217,19 @@ export class AcademyController {
    * QUIZ SERVICE
    */
   @Get('quiz/:id')
+  @Permissions([{ resource: Resource.QUIZ, actions: [Action.READ] }])
   async getSingleQuiz(@Param('id') id: string) {
     return this.academyService.getQuizById(id);
   }
 
   @Post('quiz')
+  @Permissions([{ resource: Resource.QUIZ, actions: [Action.CREATE] }])
   async createQuiz(@Body() createQuizDto: CreateQuizDto) {
     return this.academyService.createQuiz(createQuizDto);
   }
 
   @Patch('quiz/:id')
+  @Permissions([{ resource: Resource.QUIZ, actions: [Action.UPDATE] }])
   async updateQuiz(
     @Body() updateQuizDto: UpdateQuizDto,
     @Param('id') id: string,
@@ -280,7 +304,7 @@ export class AcademyController {
    */
 
   @Get('xp/history')
-  @Permissions([{ resource: Resource.COURSE, actions: [Action.READ] }])
+  @Permissions([{ resource: Resource.XP, actions: [Action.READ] }])
   async getXPHistory(@Request() req, @Query() query: GetXPHistoryDto) {
     const userId = req.user.userId as AccessTokenPayload['userId'];
     return this.xpHistoryService.getUserXPHistory(
@@ -363,8 +387,86 @@ export class AcademyController {
 }
 
 /**
- * FLOW: - create certificate, create course, create course lesson, create quiz and link everything together
+ * ACADEMY FLOW OVERVIEW:
  *
- * NB: each lesson has a single quiz
+ * ADMIN FLOW:
+ * 1. Certificate Management: Create/update/delete certificates that users can earn
+ * 2. Course Creation: Create courses with complete structure (certificate, lessons, quizzes) in one go
+ * 3. Course Editing: Modify course details, add/remove lessons, set course certificates
+ * 4. Lesson Management: Create/update lessons and link quizzes to them
+ * 5. Quiz Management: Create/update quizzes with questions and answers
  *
+ * USER FLOW:
+ * 1. Course Enrollment: Users can view and enroll in available courses
+ * 2. Lesson Progression: Users progress through lessons sequentially
+ * 3. Quiz Taking: Users take quizzes for each lesson to test knowledge
+ * 4. Progress Tracking: System tracks completion status, scores, and XP earned
+ * 5. Certificate Earning: Users receive certificates upon course completion
+ *
+ * DETAILED ROUTE BREAKDOWN:
+ *
+ * CERTIFICATE MANAGEMENT (Admin Only):
+ * - GET /certificate - List all certificate templates
+ * - GET /certificate/:id - Get specific certificate template details
+ * - POST /create-certificate - Create new certificate template
+ * - PATCH /update-certificate/:id - Update certificate template
+ * - DELETE /certificate/:id - Delete certificate template
+ *
+ * COURSE MANAGEMENT:
+ * - GET /course - List all available courses (readable by users)
+ * - GET /course/:id - Get specific course details with lessons
+ * - POST /course - Create basic course structure (admin only)
+ * - POST /course/complete - Create complete course with lessons, quizzes, and certificate (admin only)
+ * - PATCH /course/:id - Update course details (admin only)
+ * - POST /set-course-certificate - Link certificate to course (admin only)
+ * - POST /add-lesson-to-course - Add lesson to existing course (admin only)
+ * - POST /remove-lesson-from-course - Remove lesson from course (admin only)
+ * - DELETE /course/:id - Delete course (admin only)
+ *
+ * LESSON MANAGEMENT:
+ * - GET /lesson - List all lessons (readable by users)
+ * - GET /lesson/:id - Get specific lesson details (readable by users)
+ * - POST /lesson - Create new lesson (admin only)
+ * - PATCH /lesson/:id - Update lesson content (admin only)
+ * - POST /add-quiz-to-lesson - Link quiz to lesson (admin only)
+ * - POST /remove-quiz-from-lesson - Unlink quiz from lesson (admin only)
+ * - DELETE /quiz/:id - Delete quiz (admin only)
+ *
+ * QUIZ MANAGEMENT:
+ * - GET /quiz/:id - Get quiz details and questions (readable by users)
+ * - POST /quiz - Create new quiz with questions (admin only)
+ * - PATCH /quiz/:id - Update quiz content (admin only)
+ * - POST /submit-quiz - Submit quiz attempt and get results (users)
+ * - GET /quiz-attempts - Get user's quiz attempt history
+ * - GET /quiz-attempt/:id - Get specific quiz attempt details
+ *
+ * PROGRESS TRACKING:
+ * - GET /progress - Get user's overall progress across all courses
+ * - GET /progress/:courseId - Get user's progress for specific course
+ * - GET /progress/all-courses - Get progress summary for all enrolled courses
+ * - GET /stats - Get user's learning statistics and achievements
+ *
+ * XP SYSTEM:
+ * - GET /xp/history - Get user's XP earning history with pagination
+ * - GET /xp/stats - Get user's total XP and level statistics
+ * - GET /xp/leaderboard - Get global XP leaderboard
+ * - GET /xp/activity-stats - Get XP breakdown by activity type
+ * - GET /xp/recent-activity - Get recent XP earning activities
+ *
+ * USER CERTIFICATES:
+ * - GET /certificates/earned - Get user's earned certificates
+ * - GET /certificates/:id - Get specific earned certificate details
+ * - GET /certificates/:id/pdf - Generate PDF version of certificate
+ * - GET /certificates/verify/:certificateNumber - Verify certificate authenticity
+ * - GET /certificates/stats - Get user's certificate statistics
+ * - GET /certificates/recent - Get recently issued certificates
+ *
+ * USAGE PATTERNS:
+ * - Admin creates complete course: POST /course/complete
+ * - User enrolls and progresses: GET /course, GET /lesson, POST /submit-quiz
+ * - Track progress: GET /progress, GET /xp/stats
+ * - Earn certificate: Automatic upon course completion
+ * - Verify achievements: GET /certificates/earned, GET /xp/leaderboard
+ *
+ * NB: Each lesson has a single quiz, and users must complete all lessons to earn the course certificate
  */

@@ -275,8 +275,6 @@ export class QuizAttemptService {
       filter.lessonId = new Types.ObjectId(lessonId);
     }
 
-    console.log({ filter, courseId, lessonId });
-
     return this.quizAttemptModel
       .find(filter)
       .sort({ createdAt: -1 })

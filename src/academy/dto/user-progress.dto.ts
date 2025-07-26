@@ -1,4 +1,5 @@
 import { IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Course } from '../entities/course.entity';
 
 export class GetUserProgressDto {
   @IsMongoId()
@@ -46,6 +47,8 @@ export class UserProgressResponseDto {
 export class CourseProgressDto {
   @IsString()
   courseId: string;
+
+  course: Course;
 
   @IsNumber()
   totalLessons: number;

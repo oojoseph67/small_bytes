@@ -4,6 +4,7 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -23,9 +24,14 @@ import {
   XPActivityType,
 } from '../entities/xp-history.entity';
 import { SubmitQuizDto, QuizAttemptResponseDto } from '../dto/quiz-attempt.dto';
+import { NotificationService } from './notification.service';
+import { Course, CourseDocument } from '../entities/course.entity';
+import { Lesson, LessonDocument } from '../entities/lesson.entity';
 
 @Injectable()
 export class QuizAttemptService {
+  private readonly logger = new Logger(QuizAttemptService.name);
+
   constructor(
     @InjectModel(QuizAttempt.name)
     private quizAttemptModel: Model<QuizAttemptDocument>,
@@ -41,6 +47,14 @@ export class QuizAttemptService {
 
     @InjectModel(XPHistory.name)
     private xpHistoryModel: Model<XPHistoryDocument>,
+
+    @InjectModel(Course.name)
+    private courseModel: Model<CourseDocument>,
+
+    @InjectModel(Lesson.name)
+    private lessonModel: Model<LessonDocument>,
+
+    private notificationService: NotificationService,
   ) {}
 
   async submitQuiz(userId: string, submitQuizDto: SubmitQuizDto) {
@@ -128,6 +142,46 @@ export class QuizAttemptService {
       quizId,
       'quiz',
     );
+
+    // 📧 EMAIL NOTIFICATIONS: Send notifications to admins and user about quiz completion
+    // Admin notification includes quiz results, user details, and course/lesson information
+    // User notification includes their personal results and encouragement to continue learning
+    try {
+      const user = await this.userModel
+        .findById(userId)
+        .select('firstName lastName email');
+      const course = await this.courseModel.findById(courseId).select('title');
+      const lesson = await this.lessonModel.findById(lessonId).select('title');
+
+      if (user && course && lesson) {
+        // Send notification to admins
+        await this.notificationService.sendQuizCompletionNotification({
+          userName: `${user.firstName} ${user.lastName}`,
+          courseName: course.title,
+          lessonName: lesson.title,
+          quizName: `Quiz ${quiz._id}`,
+          score,
+          totalQuestions,
+          passed,
+        });
+
+        // Send notification to the user
+        await this.notificationService.sendUserQuizCompletionNotification({
+          userEmail: user.email,
+          userName: `${user.firstName} ${user.lastName}`,
+          courseName: course.title,
+          lessonName: lesson.title,
+          quizName: `Quiz ${quiz._id}`,
+          score,
+          totalQuestions,
+          passed,
+          xpEarned,
+        });
+      }
+    } catch (error) {
+      // Log error but don't fail the quiz submission
+      this.logger.error('Error sending quiz completion notifications:', error);
+    }
 
     return {
       id: quizAttempt._id.toString(),

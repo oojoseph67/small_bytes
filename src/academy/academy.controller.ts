@@ -107,16 +107,23 @@ export class AcademyController {
 
   @Post('course')
   @Permissions([{ resource: Resource.COURSE, actions: [Action.CREATE] }])
-  async createCourse(@Body() createCourseDto: CreateCourseDto) {
-    return this.academyService.createCourse(createCourseDto);
+  async createCourse(@Request() req, @Body() createCourseDto: CreateCourseDto) {
+    const userId = req.user.userId as AccessTokenPayload['userId'];
+    return this.academyService.createCourse(createCourseDto, userId);
   }
 
   @Post('course/complete')
   @Permissions([{ resource: Resource.COURSE, actions: [Action.CREATE] }])
   async createCompleteCourse(
+    @Request() req,
     @Body() createCourseCompleteDto: CreateCourseCompleteDto,
   ) {
-    return this.academyService.createCompleteCourse(createCourseCompleteDto);
+    const userId = req.user.userId as AccessTokenPayload['userId'];
+
+    return this.academyService.createCompleteCourse(
+      createCourseCompleteDto,
+      userId,
+    );
   }
 
   @Patch('course/:id')
@@ -453,4 +460,27 @@ export class AcademyController {
  * - Verify achievements: GET /certificates/earned, GET /xp/leaderboard
  *
  * NB: Each lesson has a single quiz, and users must complete all lessons to earn the course certificate
+ */
+
+/**
+ * Academy Controller
+ *
+ * 📧 EMAIL NOTIFICATIONS:
+ * This controller includes endpoints that trigger email notifications:
+ *
+ * 1. POST /academy/course - Course Creation Notification
+ *    - Sends notification to all admins when a new course is created
+ *    - Includes course details and creator information
+ *
+ * 2. POST /academy/course/complete - Complete Course Creation Notification
+ *    - Sends notification to all admins when a complete course is created
+ *    - Includes course details, lessons, quizzes, and creator information
+ *
+ * 3. POST /academy/quiz/submit - Quiz Completion Notifications
+ *    - Sends notification to all admins when a user completes a quiz
+ *    - Sends personalized notification to the user with their results
+ *    - Includes quiz results, user details, course/lesson information, and XP earned
+ *    - Provides encouragement and next steps based on pass/fail status
+ *
+ * All notifications are sent asynchronously and errors are logged but don't fail the main operation.
  */

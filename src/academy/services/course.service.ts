@@ -5,6 +5,8 @@ import { Course } from '../entities/course.entity';
 import { CreateCourseDto, UpdateCourseDto } from '../dto/course.dto';
 import { CertificateService } from './certificate.service';
 import { LessonService } from './lesson.service';
+import { NotificationService } from './notification.service';
+import { User, UserDocument } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class CourseService {
@@ -14,16 +16,44 @@ export class CourseService {
     @InjectModel(Course.name)
     private readonly courseModel: Model<Course>,
 
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
+
     private readonly certificateService: CertificateService,
 
     private readonly lessonService: LessonService,
+
+    private readonly notificationService: NotificationService,
   ) {}
 
-  async createCourse(createCourseDto: CreateCourseDto): Promise<Course> {
+  async createCourse(createCourseDto: CreateCourseDto, creatorId?: string): Promise<Course> {
     try {
-      return await this.courseModel.create({
+      const course = await this.courseModel.create({
         ...createCourseDto,
       });
+
+      // 📧 EMAIL NOTIFICATION: Send notification to all admins when a new course is created
+      // This notification includes course details and creator information
+      try {
+        let courseCreator = 'Admin';
+        if (creatorId) {
+          const creator = await this.userModel.findById(creatorId).select('firstName lastName');
+          if (creator) {
+            courseCreator = `${creator.firstName} ${creator.lastName}`;
+          }
+        }
+
+        await this.notificationService.sendCourseCreationNotification({
+          courseName: course.title,
+          courseDescription: course.description,
+          courseCreator,
+        });
+      } catch (error) {
+        // Log error but don't fail the course creation
+        this.logger.error('Error sending course creation notification:', error);
+      }
+
+      return course;
     } catch (error: any) {
       if (error instanceof HttpException) {
         throw error;

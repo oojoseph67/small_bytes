@@ -18,6 +18,8 @@ import {
 } from './entities/user-certificate.entity';
 import { User, UserSchema } from 'src/user/entities/user.entity';
 import { UserModule } from 'src/user/user.module';
+import { EmailModule } from 'src/email/email.module';
+import { RolesModule } from 'src/roles/roles.module';
 import { LessonService } from './services/lesson.service';
 import { QuizService } from './services/quiz.service';
 import { CertificateService } from './services/certificate.service';
@@ -26,6 +28,7 @@ import { QuizAttemptService } from './services/quiz-attempt.service';
 import { UserProgressService } from './services/user-progress.service';
 import { XPHistoryService } from './services/xp-history.service';
 import { UserCertificateService } from './services/user-certificate.service';
+import { NotificationService } from './services/notification.service';
 
 @Module({
   controllers: [AcademyController],
@@ -39,9 +42,12 @@ import { UserCertificateService } from './services/user-certificate.service';
     UserProgressService,
     XPHistoryService,
     UserCertificateService,
+    NotificationService,
   ],
   imports: [
     forwardRef(() => UserModule),
+    EmailModule,
+    RolesModule,
     MongooseModule.forFeature([
       {
         name: Lesson.name,

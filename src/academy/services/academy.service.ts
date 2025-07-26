@@ -67,11 +67,11 @@ export class AcademyService {
    * COURSE SERVICE
    */
 
-  async createCourse(createCourseDto: CreateCourseDto) {
-    return await this.courseService.createCourse(createCourseDto);
+  async createCourse(createCourseDto: CreateCourseDto, creatorId?: string) {
+    return await this.courseService.createCourse(createCourseDto, creatorId);
   }
 
-  async createCompleteCourse(createCourseCompleteDto: CreateCourseCompleteDto) {
+  async createCompleteCourse(createCourseCompleteDto: CreateCourseCompleteDto, creatorId?: string) {
     // Create certificate first if provided
     let certificateId: string | undefined;
     if (createCourseCompleteDto.certificate) {
@@ -88,7 +88,7 @@ export class AcademyService {
       category: createCourseCompleteDto.category,
       certificate: certificateId,
     };
-    const course = await this.courseService.createCourse(courseData);
+    const course = await this.courseService.createCourse(courseData, creatorId);
 
     // Create lessons and quizzes
     const lessonIds: string[] = [];

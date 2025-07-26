@@ -58,6 +58,108 @@ export class EmailService {
     await this.sendEmail({ html, subject, to: [to] });
   }
 
+  /**
+   * Send notification to admin when a user completes a quiz
+   */
+  async sendQuizCompletionNotification({
+    to,
+    adminName,
+    userName,
+    courseName,
+    lessonName,
+    quizName,
+    score,
+    totalQuestions,
+    passed,
+  }: {
+    to: string;
+    adminName: string;
+    userName: string;
+    courseName: string;
+    lessonName: string;
+    quizName: string;
+    score: number;
+    totalQuestions: number;
+    passed: boolean;
+  }) {
+    const { html, subject } = this.emailTemplatesProvider.sendQuizCompletionNotification({
+      adminName,
+      userName,
+      courseName,
+      lessonName,
+      quizName,
+      score,
+      totalQuestions,
+      passed,
+    });
+
+    await this.sendEmail({ html, subject, to: [to] });
+  }
+
+  /**
+   * Send notification to all admins when a new course is created
+   */
+  async sendCourseCreationNotification({
+    to,
+    adminName,
+    courseName,
+    courseDescription,
+    courseCreator,
+  }: {
+    to: string;
+    adminName: string;
+    courseName: string;
+    courseDescription: string;
+    courseCreator: string;
+  }) {
+    const { html, subject } = this.emailTemplatesProvider.sendCourseCreationNotification({
+      adminName,
+      courseName,
+      courseDescription,
+      courseCreator,
+    });
+
+    await this.sendEmail({ html, subject, to: [to] });
+  }
+
+  /**
+   * Send quiz completion notification to the user who took the quiz
+   */
+  async sendUserQuizCompletionNotification({
+    to,
+    userName,
+    courseName,
+    lessonName,
+    quizName,
+    score,
+    totalQuestions,
+    passed,
+    xpEarned,
+  }: {
+    to: string;
+    userName: string;
+    courseName: string;
+    lessonName: string;
+    quizName: string;
+    score: number;
+    totalQuestions: number;
+    passed: boolean;
+    xpEarned: number;
+  }) {
+    const { html, subject } = this.emailTemplatesProvider.sendUserQuizCompletionNotification({
+      userName,
+      courseName,
+      lessonName,
+      quizName,
+      score,
+      totalQuestions,
+      passed,
+      xpEarned,
+    });
+
+    await this.sendEmail({ html, subject, to: [to] });
+  }
+
   private async sendEmail({ html, subject, to }: SendEmail) {
     try {
       const { data, error } = await this.resend.emails.send({

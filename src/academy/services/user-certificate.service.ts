@@ -11,6 +11,7 @@ import {
   CertificateDocument,
 } from '../entities/certificate.entity';
 import { Course, CourseDocument } from '../entities/course.entity';
+import { CertificateService } from './certificate.service';
 
 @Injectable()
 export class UserCertificateService {
@@ -26,6 +27,8 @@ export class UserCertificateService {
 
     @InjectModel(Course.name)
     private courseModel: Model<CourseDocument>,
+
+    private certificateService: CertificateService,
   ) {}
 
   async getUserCertificates(userId: string) {
@@ -51,46 +54,9 @@ export class UserCertificateService {
     // }));
   }
 
-  async getCertificateById(certificateId: string) {
-    const certificate = await this.userCertificateModel
-      .findById(certificateId)
-      .populate('userId', 'firstName lastName email')
-      .populate('certificateId', 'title description issuedBy')
-      .populate('courseId', 'title description category');
-
-    if (!certificate) {
-      throw new NotFoundException('Certificate not found');
-    }
-
-    return certificate;
-
-    // return {
-    //   id: certificate._id.toString(),
-    //   certificateNumber: certificate.certificateNumber,
-    //   user: {
-    //     id: certificate.userId._id.toString(),
-    //     firstName: certificate.userId.firstName,
-    //     lastName: certificate.userId.lastName,
-    //     email: certificate.userId.email,
-    //   },
-    //   certificate: {
-    //     title: certificate.certificateId.title,
-    //     description: certificate.certificateId.description,
-    //     issuedBy: certificate.certificateId.issuedBy,
-    //   },
-    //   course: {
-    //     title: certificate.courseId.title,
-    //     description: certificate.courseId.description,
-    //     category: certificate.courseId.category,
-    //   },
-    //   finalScore: certificate.finalScore,
-    //   xpEarned: certificate.xpEarned,
-    //   issuedAt: certificate.issuedAt.toISOString(),
-    // };
-  }
-
   async generateCertificatePDF(certificateId: string) {
-    const certificate = await this.getCertificateById(certificateId);
+    const certificate =
+      await this.certificateService.findCertificateById(certificateId);
 
     // This would integrate with a PDF generation service
     // For now, return the certificate data that can be used to generate PDF
@@ -99,38 +65,6 @@ export class UserCertificateService {
       pdfUrl: `/certificates/${certificateId}/pdf`, // Placeholder for PDF generation
       message: 'PDF generation endpoint - integrate with PDF service',
     };
-  }
-
-  async verifyCertificate(certificateNumber: string) {
-    const certificate = await this.userCertificateModel
-      .findOne({ certificateNumber })
-      .populate('userId', 'firstName lastName email')
-      .populate('certificateId', 'title description issuedBy')
-      .populate('courseId', 'title description category');
-
-    if (!certificate) {
-      throw new NotFoundException('Certificate not found or invalid');
-    }
-
-    return certificate;
-
-    // return {
-    //   isValid: true,
-    //   certificate: {
-    //     id: certificate._id.toString(),
-    //     certificateNumber: certificate.certificateNumber,
-    //     user: {
-    //       firstName: certificate.userId.firstName,
-    //       lastName: certificate.userId.lastName,
-    //       email: certificate.userId.email,
-    //     },
-    //     title: certificate.certificateId.title,
-    //     issuedBy: certificate.certificateId.issuedBy,
-    //     courseTitle: certificate.courseId.title,
-    //     finalScore: certificate.finalScore,
-    //     issuedAt: certificate.issuedAt.toISOString(),
-    //   },
-    // };
   }
 
   async getCertificateStats(userId: string) {
@@ -154,11 +88,14 @@ export class UserCertificateService {
       .find({ userId: new Types.ObjectId(userId) })
       .populate('courseId', 'category');
 
-    const categoryStats = certificatesWithCourses.reduce((acc: Record<string, number>, cert) => {
-      const category = (cert.courseId as any).category;
-      acc[category] = (acc[category] || 0) + 1;
-      return acc;
-    }, {});
+    const categoryStats = certificatesWithCourses.reduce(
+      (acc: Record<string, number>, cert) => {
+        const category = (cert.courseId as any).category;
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      },
+      {},
+    );
 
     return {
       totalCertificates,

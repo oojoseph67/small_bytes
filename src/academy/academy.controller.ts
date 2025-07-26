@@ -352,24 +352,10 @@ export class AcademyController {
     return this.userCertificateService.getUserCertificates(userId);
   }
 
-  @Get('certificates/:id')
-  @Permissions([{ resource: Resource.CERTIFICATE, actions: [Action.READ] }])
-  async getCertificateById(@Param('id') id: string) {
-    return this.userCertificateService.getCertificateById(id);
-  }
-
   @Get('certificates/:id/pdf')
   @Permissions([{ resource: Resource.CERTIFICATE, actions: [Action.READ] }])
   async generateCertificatePDF(@Param('id') id: string) {
     return this.userCertificateService.generateCertificatePDF(id);
-  }
-
-  @Get('certificates/verify/:certificateNumber')
-  @Permissions([{ resource: Resource.CERTIFICATE, actions: [Action.READ] }])
-  async verifyCertificate(
-    @Param('certificateNumber') certificateNumber: string,
-  ) {
-    return this.userCertificateService.verifyCertificate(certificateNumber);
   }
 
   @Get('certificates/stats')
@@ -455,9 +441,7 @@ export class AcademyController {
  *
  * USER CERTIFICATES:
  * - GET /certificates/earned - Get user's earned certificates
- * - GET /certificates/:id - Get specific earned certificate details
  * - GET /certificates/:id/pdf - Generate PDF version of certificate
- * - GET /certificates/verify/:certificateNumber - Verify certificate authenticity
  * - GET /certificates/stats - Get user's certificate statistics
  * - GET /certificates/recent - Get recently issued certificates
  *

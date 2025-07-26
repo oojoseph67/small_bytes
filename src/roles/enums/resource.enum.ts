@@ -10,6 +10,7 @@ export enum Resource {
   COURSE = 'course',
   XP = 'xp',
   BLOG = 'blog',
+  GLOSSARY = 'glossary',
 }
 
 // sections in the application

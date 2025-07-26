@@ -12,8 +12,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { BlogService } from './services/blog.service';
-import { CreateBlogDto, UpdateBlogDto } from './dto';
+import { BlogService } from '../services/blog.service';
+import { CreateBlogDto, UpdateBlogDto } from '../dto';
 import { MulterFile } from 'src/cloudinary/types';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Action } from 'src/roles/enums/action.enum';

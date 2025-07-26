@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BlogController } from './blog.controller';
+import { BlogController } from './controllers/blog.controller';
 import { BlogService } from './services/blog.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
@@ -15,6 +15,11 @@ import {
 import { BlogMediaService } from './services/blog-media.service';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { UserModule } from 'src/user/user.module';
+import { NewsService } from './services/news.service';
+import { GlossaryService } from './services/glossary.service';
+import { GlossaryController } from './controllers/glossary.controller';
+
+// TODO: integrate news ticker api
 
 @Module({
   imports: [
@@ -40,7 +45,7 @@ import { UserModule } from 'src/user/user.module';
     CloudinaryModule,
     UserModule,
   ],
-  controllers: [BlogController],
-  providers: [BlogService, BlogMediaService],
+  controllers: [BlogController, GlossaryController],
+  providers: [BlogService, BlogMediaService, NewsService, GlossaryService],
 })
 export class BlogModule {}

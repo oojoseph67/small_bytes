@@ -38,28 +38,42 @@ export class CloudinaryService {
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
   }
+
+  async deleteFile(publicId: string): Promise<boolean> {
+    this.logger.debug(`deleting file with public ID: ${publicId}`);
+
+    return new Promise<boolean>((resolve, reject) => {
+      cloudinary.uploader.destroy(publicId, (error, result) => {
+        if (error) {
+          this.logger.error('error deleting file from cloudinary', error);
+          return reject(error);
+        }
+
+        this.logger.debug(`file deleted successfully: ${result.result}`);
+        resolve(result.result === 'ok');
+      });
+    });
+  }
+
+  extractPublicIdFromUrl(url: string): string | null {
+    try {
+      // Extract public ID from Cloudinary URL
+      // Example URL: https://res.cloudinary.com/demo/image/upload/v1234567890/small-bytes/community-media/filename.jpg
+      const urlParts = url.split('/');
+      const uploadIndex = urlParts.findIndex((part) => part === 'upload');
+
+      if (uploadIndex === -1 || uploadIndex + 1 >= urlParts.length) {
+        return null;
+      }
+
+      // Get everything after 'upload' and before the file extension
+      const pathAfterUpload = urlParts.slice(uploadIndex + 2).join('/');
+      const publicId = pathAfterUpload.replace(/\.[^/.]+$/, ''); // Remove file extension
+
+      return publicId;
+    } catch (error) {
+      this.logger.error('error extracting public ID from URL', error);
+      return null;
+    }
+  }
 }
-
-// const [collectionImage, collectionBackgroundImage] = await Promise.all([
-//   files.collectionImage?.[0]
-//     ? this.cloudinaryService.uploadFile({
-//         file: files.collectionImage[0],
-//         folder: 'collections/images',
-//       })
-//     : null,
-//   files.collectionBackgroundImage?.[0]
-//     ? this.cloudinaryService.uploadFile({
-//         file: files.collectionBackgroundImage[0],
-//         folder: 'collections/backgrounds',
-//       })
-//     : null,
-// ]);
-
-// if (!collectionImage || !collectionBackgroundImage) {
-//   throw new HttpException(
-//     'Image upload failed',
-//     HttpStatus.INTERNAL_SERVER_ERROR,
-//   );
-// }
-
-// const url = collectionImage.secure_url

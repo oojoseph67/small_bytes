@@ -11,6 +11,7 @@ export enum Resource {
   XP = 'xp',
   BLOG = 'blog',
   GLOSSARY = 'glossary',
+  GALLERY = 'gallery',
 }
 
 // sections in the application

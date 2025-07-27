@@ -24,7 +24,7 @@ import {
   XPActivityType,
 } from '../entities/xp-history.entity';
 import { SubmitQuizDto, QuizAttemptResponseDto } from '../dto/quiz-attempt.dto';
-import { NotificationService } from './notification.service';
+import { NotificationService } from './academy-notification.service';
 import { Course, CourseDocument } from '../entities/course.entity';
 import { Lesson, LessonDocument } from '../entities/lesson.entity';
 

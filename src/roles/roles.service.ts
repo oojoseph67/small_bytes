@@ -172,6 +172,10 @@ export class RolesService implements OnModuleInit {
               resource: Resource.XP,
               actions: [Action.READ],
             },
+            {
+              resource: Resource.BLOG,
+              actions: [Action.READ, Action.POST],
+            },
           ],
         },
       ];

@@ -28,7 +28,7 @@ import { QuizAttemptService } from './services/quiz-attempt.service';
 import { UserProgressService } from './services/user-progress.service';
 import { XPHistoryService } from './services/xp-history.service';
 import { UserCertificateService } from './services/user-certificate.service';
-import { NotificationService } from './services/notification.service';
+import { NotificationService } from './services/academy-notification.service';
 
 @Module({
   controllers: [AcademyController],

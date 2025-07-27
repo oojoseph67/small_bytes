@@ -7,6 +7,7 @@ export enum XPActivityType {
   LESSON_COMPLETION = 'lesson_completion',
   COURSE_COMPLETION = 'course_completion',
   CERTIFICATE_EARNED = 'certificate_earned',
+  BLOG_POLL_ANSWERED = 'blog_poll_answered',
   BONUS = 'bonus',
   PENALTY = 'penalty',
 }

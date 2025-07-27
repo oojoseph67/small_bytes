@@ -5,7 +5,7 @@ import { Course } from '../entities/course.entity';
 import { CreateCourseDto, UpdateCourseDto } from '../dto/course.dto';
 import { CertificateService } from './certificate.service';
 import { LessonService } from './lesson.service';
-import { NotificationService } from './notification.service';
+import { NotificationService } from './academy-notification.service';
 import { User, UserDocument } from 'src/user/entities/user.entity';
 
 @Injectable()

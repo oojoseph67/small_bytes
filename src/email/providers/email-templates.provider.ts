@@ -527,4 +527,94 @@ export class EmailTemplatesProvider {
       html,
     };
   }
+
+  sendUserBlogPollCompletionNotification({
+    userName,
+    passed,
+    xpEarned,
+  }: {
+    userName: string;
+    passed: boolean;
+    xpEarned: number;
+  }): EmailTemplateResponse {
+    const status = passed ? 'CORRECT' : 'PARTICIPATED';
+    const statusColor = passed ? '#28a745' : '#007bff';
+    const statusEmoji = passed ? '🎉' : '💪';
+    const message = passed 
+      ? `Congratulations! You answered the blog poll correctly and earned ${xpEarned} XP!`
+      : `Great participation! You earned ${xpEarned} XP for engaging with our content.`;
+
+    const subject = passed 
+      ? `🎉 Blog Poll Answered Correctly - Small Bytes`
+      : `💪 Blog Poll Participation - Small Bytes`;
+
+    const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h2 style="color: #333; text-align: center; margin-bottom: 30px;">${statusEmoji} Blog Poll Results</h2>
+                    
+                    <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                        Hi ${userName},
+                    </p>
+                    
+                    <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                        ${message}
+                    </p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${statusColor};">
+                        <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">Your Poll Performance</h3>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #333;">Status:</strong> 
+                            <span style="color: ${statusColor}; font-weight: bold;">${statusEmoji} ${status}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 0;">
+                            <strong style="color: #333;">XP Earned:</strong> 
+                            <span style="color: #007bff; font-weight: bold;">+${xpEarned} XP</span>
+                        </div>
+                    </div>
+                    
+                    ${passed ? `
+                    <div style="background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
+                        <h4 style="color: #28a745; margin: 0 0 10px 0;">🎯 Great Job!</h4>
+                        <p style="color: #666; margin: 0; line-height: 1.5;">
+                            You're showing excellent understanding of the content! Keep engaging with our blog posts to earn more XP and expand your knowledge.
+                        </p>
+                    </div>
+                    ` : `
+                    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
+                        <h4 style="color: #007bff; margin: 0 0 10px 0;">💡 Keep Learning</h4>
+                        <p style="color: #666; margin: 0; line-height: 1.5;">
+                            Every interaction with our content helps you learn! Continue reading our blog posts and participating in polls to grow your knowledge.
+                        </p>
+                    </div>
+                    `}
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="#" style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin-right: 10px;">Read More Blogs</a>
+                        <a href="#" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">View Progress</a>
+                    </div>
+                    
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h4 style="color: #333; margin: 0 0 10px 0;">📚 Why Blog Polls Matter</h4>
+                        <p style="color: #666; margin: 0; line-height: 1.5;">
+                            Blog polls help reinforce your learning and test your understanding of the content. They're a fun way to earn XP while staying engaged with our tech insights!
+                        </p>
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                    
+                    <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+                        This is an automated notification from Small Bytes. Keep engaging with our content! 🚀
+                    </p>
+                </div>
+            </div>
+        `;
+
+    return {
+      subject,
+      html,
+    };
+  }
 }

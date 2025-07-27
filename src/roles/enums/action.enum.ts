@@ -3,5 +3,5 @@ export enum Action {
   CREATE = 'create',
   UPDATE = 'update',
   DELETE = 'delete',
-  POST = 'post'
+  POST = 'post',
 }

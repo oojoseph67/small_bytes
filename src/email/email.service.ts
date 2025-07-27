@@ -22,6 +22,9 @@ export class EmailService {
     this.resendFromEmail = this.resendConfiguration.resendFromEmail;
   }
 
+  /**
+   * Send forgot password email to users
+   */
   async sendForgotPasswordEmail({ token, to }: { token: string; to: string }) {
     const link = `${this.frontendUrl}/reset-password?token=${token}`;
 
@@ -30,6 +33,9 @@ export class EmailService {
     await this.sendEmail({ html, subject, to: [to] });
   }
 
+  /**
+   * Send welcome email to new users
+   */
   async sendWelcomeEmail({ to, firstName }: { to: string; firstName: string }) {
     const { html, subject } = this.emailTemplatesProvider.sendWelcomeEmail({
       name: firstName,
@@ -38,6 +44,9 @@ export class EmailService {
     await this.sendEmail({ html, subject, to: [to] });
   }
 
+  /**
+   * Send newsletter to users
+   */
   async sendNewsletter({
     newsletterSubject,
     content,
@@ -52,7 +61,7 @@ export class EmailService {
     const { html, subject } = this.emailTemplatesProvider.sendNewsletterEmail({
       content,
       subject: newsletterSubject,
-      unsubscribeLink: link
+      unsubscribeLink: link,
     });
 
     await this.sendEmail({ html, subject, to: [to] });
@@ -82,16 +91,17 @@ export class EmailService {
     totalQuestions: number;
     passed: boolean;
   }) {
-    const { html, subject } = this.emailTemplatesProvider.sendQuizCompletionNotification({
-      adminName,
-      userName,
-      courseName,
-      lessonName,
-      quizName,
-      score,
-      totalQuestions,
-      passed,
-    });
+    const { html, subject } =
+      this.emailTemplatesProvider.sendQuizCompletionNotification({
+        adminName,
+        userName,
+        courseName,
+        lessonName,
+        quizName,
+        score,
+        totalQuestions,
+        passed,
+      });
 
     await this.sendEmail({ html, subject, to: [to] });
   }
@@ -112,12 +122,13 @@ export class EmailService {
     courseDescription: string;
     courseCreator: string;
   }) {
-    const { html, subject } = this.emailTemplatesProvider.sendCourseCreationNotification({
-      adminName,
-      courseName,
-      courseDescription,
-      courseCreator,
-    });
+    const { html, subject } =
+      this.emailTemplatesProvider.sendCourseCreationNotification({
+        adminName,
+        courseName,
+        courseDescription,
+        courseCreator,
+      });
 
     await this.sendEmail({ html, subject, to: [to] });
   }
@@ -146,17 +157,36 @@ export class EmailService {
     passed: boolean;
     xpEarned: number;
   }) {
-    const { html, subject } = this.emailTemplatesProvider.sendUserQuizCompletionNotification({
-      userName,
-      courseName,
-      lessonName,
-      quizName,
-      score,
-      totalQuestions,
-      passed,
-      xpEarned,
-    });
+    const { html, subject } =
+      this.emailTemplatesProvider.sendUserQuizCompletionNotification({
+        userName,
+        courseName,
+        lessonName,
+        quizName,
+        score,
+        totalQuestions,
+        passed,
+        xpEarned,
+      });
 
+    await this.sendEmail({ html, subject, to: [to] });
+  }
+
+  /**
+   * Send blog pool completion notification to the user who took it
+   */
+  async sendUserBlogPollCompletionNotification({
+    to,
+    userName,
+    passed,
+    xpEarned,
+  }) {
+    const { html, subject } =
+      this.emailTemplatesProvider.sendUserBlogPollCompletionNotification({
+        userName,
+        passed,
+        xpEarned,
+      });
     await this.sendEmail({ html, subject, to: [to] });
   }
 

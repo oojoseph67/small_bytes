@@ -6,3 +6,6 @@ export * from './create-blog-media.dto';
 export * from './update-blog-media.dto';
 export * from './create-glossary.dto';
 export * from './update-glossary.dto';
+export * from './create-blog-poll.dto';
+export * from './update-blog-poll.dto';
+export * from './submit-blog-poll.dto';

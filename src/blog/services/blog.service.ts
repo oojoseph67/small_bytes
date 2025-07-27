@@ -1,10 +1,11 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateBlogDto, UpdateBlogDto } from '../dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { BlogPost, BlogPostDocument } from '../entities';
+import { BlogPollDocument, BlogPost, BlogPostDocument } from '../entities';
 import { Model, Types } from 'mongoose';
 import { BlogMediaService } from './blog-media.service';
 import { MulterFile } from 'src/cloudinary/types';
+import { BlogPollService } from './blog-poll.service';
 
 @Injectable()
 export class BlogService {
@@ -15,6 +16,8 @@ export class BlogService {
     private readonly blogPostModel: Model<BlogPostDocument>,
 
     private readonly blogMediaService: BlogMediaService,
+
+    private readonly blogPollService: BlogPollService,
   ) {}
 
   async create({
@@ -70,7 +73,9 @@ export class BlogService {
 
       this.logger.log('blog post created');
 
-      return await this.getSingleBlogPost(blogPost.id);
+      const resultBlogPost = await this.getSingleBlogPost(blogPost.id);
+
+      return resultBlogPost.blogPost;
     } catch (error: any) {
       this.logger.error('error creating blog post', error.message);
 
@@ -88,7 +93,8 @@ export class BlogService {
   async publishBlogPost(blogPostId: string): Promise<BlogPostDocument> {
     this.logger.debug('publishing blog post');
     try {
-      const blogPost = await this.getSingleBlogPost(blogPostId);
+      const resultBlogPost = await this.getSingleBlogPost(blogPostId);
+      const blogPost = resultBlogPost.blogPost;
 
       if (!blogPost) {
         throw new HttpException(
@@ -116,13 +122,24 @@ export class BlogService {
     }
   }
 
-  async getSingleBlogPost(blogPostId: string): Promise<BlogPostDocument> {
+  async getSingleBlogPost(
+    blogPostId: string,
+  ): Promise<{ blogPost: BlogPostDocument; blogPoll: BlogPollDocument[] }> {
     this.logger.debug('getting single blog post');
 
     try {
-      return await this.blogPostModel
+      const blogPost = await this.blogPostModel
         .findById(blogPostId)
         .populate('featuredImage');
+
+      const blogPoll = await this.blogPollService.getBlogPollsByBlogId({
+        blogId: blogPost._id.toString(),
+      });
+
+      return {
+        blogPoll,
+        blogPost,
+      };
     } catch (error: any) {
       this.logger.error('error fetching single blog post', error.message);
 
@@ -137,13 +154,30 @@ export class BlogService {
     }
   }
 
-  async getAllPublishedBlogPost(): Promise<BlogPostDocument[]> {
+  async getAllPublishedBlogPost(): Promise<{
+    blogPost: BlogPostDocument[];
+    blogPoll: BlogPollDocument[];
+  }> {
     this.logger.debug('getting all published blog post');
 
     try {
-      return await this.blogPostModel
+      const blogPost = await this.blogPostModel
         .find({ isPublished: true })
         .populate('featuredImage');
+
+      // Get all blog polls for all published posts
+      const blogPollPromises = blogPost.map((post) =>
+        this.blogPollService.getBlogPollsByBlogId({
+          blogId: post._id.toString(),
+        }),
+      );
+      const blogPollResults = await Promise.all(blogPollPromises);
+      const blogPoll = blogPollResults.flat();
+
+      return {
+        blogPost,
+        blogPoll,
+      };
     } catch (error: any) {
       this.logger.error('error fetching published blog posts', error.message);
 
@@ -158,13 +192,29 @@ export class BlogService {
     }
   }
 
-  async getAllUnPublishedBlogPost(): Promise<BlogPostDocument[]> {
+  async getAllUnPublishedBlogPost(): Promise<{
+    blogPost: BlogPostDocument[];
+    blogPoll: BlogPollDocument[];
+  }> {
     this.logger.debug('getting all unpublished blog post');
 
     try {
-      return await this.blogPostModel
+      const blogPost = await this.blogPostModel
         .find({ isPublished: false })
         .populate('featuredImage');
+
+      const blogPollPromises = blogPost.map((post) =>
+        this.blogPollService.getBlogPollsByBlogId({
+          blogId: post._id.toString(),
+        }),
+      );
+      const blogPollResults = await Promise.all(blogPollPromises);
+      const blogPoll = blogPollResults.flat();
+
+      return {
+        blogPost,
+        blogPoll,
+      };
     } catch (error: any) {
       this.logger.error('error fetching unpublished blog posts', error.message);
 
@@ -193,7 +243,8 @@ export class BlogService {
     this.logger.debug('updating blog post');
 
     try {
-      const blogPost = await this.getSingleBlogPost(blogPostId);
+      const resultBlogPost = await this.getSingleBlogPost(blogPostId);
+      const blogPost = resultBlogPost.blogPost;
 
       if (!blogPost) {
         throw new HttpException(`Blog post not found`, HttpStatus.NOT_FOUND);

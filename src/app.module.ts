@@ -15,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { AcademyModule } from './academy/academy.module';
 import { BlogModule } from './blog/blog.module';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
@@ -50,6 +51,8 @@ import { BlogModule } from './blog/blog.module';
     AcademyModule,
 
     BlogModule,
+
+    CommunityModule,
   ],
   controllers: [AppController],
   providers: [

@@ -28,7 +28,7 @@ import { AccessTokenPayload } from 'src/auth/type/auth.type';
 @Controller('blog-polls')
 export class BlogPollController {
   constructor(private readonly blogPollService: BlogPollService) {}
-  
+
   @Post()
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @Permissions([{ resource: Resource.BLOG, actions: [Action.CREATE] }])
@@ -114,3 +114,58 @@ export class BlogPollController {
     return await this.blogPollService.deleteBlogPoll({ pollId });
   }
 }
+
+/**
+ * BLOG POLL FLOW OVERVIEW:
+ *
+ * ADMIN FLOW:
+ * 1. Poll Creation: Create interactive polls for blog posts with multiple choice questions
+ * 2. Poll Management: Update poll questions, options, correct answers, and XP rewards
+ * 3. Poll Deletion: Remove polls and their associated attempts
+ * 4. Statistics Access: View detailed poll statistics and user performance metrics
+ *
+ * USER FLOW:
+ * 1. Poll Participation: Answer polls associated with blog posts
+ * 2. XP Earning: Earn XP based on correct/incorrect answers (100% for correct, 30% for incorrect)
+ * 3. Progress Tracking: View personal poll attempt history and performance
+ * 4. Learning Feedback: Receive immediate feedback with explanations and correct answers
+ *
+ * DETAILED ROUTE BREAKDOWN:
+ *
+ * POLL MANAGEMENT (Admin Only):
+ * - POST /blog-polls - Create new blog poll with question, options, correct answer, and XP reward
+ * - PATCH /blog-polls/:pollId - Update poll content, options, or XP rewards
+ * - DELETE /blog-polls/:pollId - Delete poll and all associated attempts
+ * - GET /blog-polls/:pollId/statistics - View detailed poll statistics (Admin only)
+ *
+ * POLL PARTICIPATION (Authenticated Users):
+ * - POST /blog-polls/submit - Submit poll answer and earn XP
+ * - GET /blog-polls/user/attempts - View personal poll attempt history
+ * - GET /blog-polls/user/attempts/:blogId - View attempts for specific blog
+ *
+ * PUBLIC ACCESS:
+ * - GET /blog-polls - List all available polls
+ * - GET /blog-polls/:pollId - Get specific poll details
+ * - GET /blog-polls/blog/:blogId - Get all polls for a specific blog post
+ *
+ * XP SYSTEM INTEGRATION:
+ * - Correct answers: Full XP reward (default 10 XP)
+ * - Incorrect answers: 30% of XP reward (3 XP by default)
+ * - XP automatically added to user's total and tracked in XP history
+ * - Email notifications sent for poll submissions
+ *
+ * DATA VALIDATION:
+ * - Polls must have 2-6 options
+ * - Correct index must be within option range
+ * - Users can only answer each poll once
+ * - XP rewards must be positive integers
+ *
+ * USAGE PATTERNS:
+ * - Admin creates poll: POST /blog-polls
+ * - User answers poll: POST /blog-polls/submit
+ * - Track performance: GET /blog-polls/user/attempts
+ * - View statistics: GET /blog-polls/:pollId/statistics (Admin)
+ * - Manage polls: PATCH/DELETE /blog-polls/:pollId (Admin)
+ *
+ * NB: Polls are tied to specific blog posts and enhance user engagement through gamification
+ */
